@@ -1,0 +1,138 @@
+// Example instructions for x86
+// mov eax, dword ptr[eax]
+// mov ax, word ptr[eax]
+// mov eax, byte ptr[eax]
+// 
+// mov al, byte ptr[eax]
+// 
+// mov eax, ebx
+// mov al, bl
+// 
+// mov eax, 1
+// mov al, 1
+
+////////////////////////////////////////
+.INT_TYPES
+
+// All integer types must start with int
+// Each line in the integer definition lists constrains for that integer.
+
+int_signed_8_bits =
+& x <= 127
+& x >= -128
+;
+
+int_unsigned_8_bits =
+& x <= 255
+& x >= 0
+;
+
+int_signed_16_bits =
+& x <= 32767
+& x >= -32768
+;
+
+int_unsigned_16_bits =
+& x <= 65535
+& x >= 0
+;
+
+int_signed_32_bits =
+& x <= 2147483647
+& x >= −2147483648
+;
+
+int_unsigned_32_bits =
+& x <= 4294967295
+& x >= 0
+;
+
+////////////////////////////////////////
+.ASM_INSTRUCTIONS
+
+INSTRUCTION = 
+| %MNEMONIC_2OPS% %TWO_OPERANDS%
+;
+
+MNEMONIC_2OPS =
+| mov
+| xor
+;
+
+TWO_OPERANDS =
+| %8_BIT_REG%, %8_BIT_IMMEDIATE%
+| %8_BIT_REG%, %8_BIT_MEM_OP%
+| %8_BIT_REG%, %8_BIT_REG%
+
+| %8_BIT_MEM_OP%, %8_BIT_REG%
+| %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%
+
+| %16_BIT_REG%, %16_BIT_IMMEDIATE%
+| %16_BIT_REG%, %16_BIT_MEM_OP%
+| %16_BIT_REG%, %16_BIT_REG%
+
+| %16_BIT_MEM_OP%, %16_BIT_REG%
+| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%
+
+| %32_BIT_REG%, %32_BIT_IMMEDIATE%
+| %32_BIT_REG%, %32_BIT_MEM_OP%
+| %32_BIT_REG%, %32_BIT_REG%
+
+| %32_BIT_MEM_OP%, %32_BIT_REG%
+| %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%
+;
+
+8_BIT_REG =
+| al
+| bl
+;
+
+POINTER = 
+| ptr[%32_BIT_REG%]
+| ptr[%32_BIT_IMMEDIATE%]
+;
+
+8_BIT_MEM_OP = 
+| byte %POINTER%
+;
+
+8_BIT_IMMEDIATE = 
+| int_unsigned_8_bits
+| int_signed_8_bits
+;
+
+16_BIT_REG =
+| ax
+| bx
+;
+
+16_BIT_MEM_OP =
+| word POINTER
+;
+
+16_BIT_IMMEDIATE =
+| int_unsigned_16_bits
+| int_signed_16_bits
+;
+
+32_BIT_REG =
+| eax
+| ebx
+;
+
+32_BIT_MEM_OP = 
+| dword POINTER
+;
+
+32_BIT_IMMEDIATE = 
+| int_unsigned_32_bits
+| int_signed_32_bits
+;
+
+////////////////////////////////////////
+// TODO x86:
+// constraints on integer immediates
+// need to make pointer expressions more complex
+// labels, directives?
+// 
+// regular vs context free? I think we're regular.
