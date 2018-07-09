@@ -1,0 +1,35 @@
+Development July 8
+
+- Created a grammar, simple regular grammar
+- Recursive definitions not allowed
+
+Grammar has two sections, one for 
+
+
+=======
+
+Supervisor meeting July 9
+
+Validate by running on a QEMU machine. Talk about 
+
+SIGMA16. Try implementing the arch in the generic assembler.
+
+Goals/Evaluation:
+- handling a number of architectures (4 arches? ARM x86 MIPS sigma16)
+
+- What's challenging about x86 is that instruction encodings are variable length, complicated, and sometimes encodings split across multiple bytes
+
+- z80. Might be a good target. Motorola 68k are also good targets. 
+
+- Have a future work section where you talk about what you would do if you had time. 
+
+- Have a good user manual, including how to write plugins. Let that go into appendices. 
+
+- For introduction: not make it boiler plate. Tell reader what you are doing. What the goals are. 
+	Then in testing&evaluation you can say 'here is evidence this goal was met, here is evidence that goal was met...'
+
+- 
+
+
+=======
+

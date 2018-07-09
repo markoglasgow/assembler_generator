@@ -1,0 +1,76 @@
+// Example ARM instructions
+// 
+// mov r0, #1
+// mov r0, r1
+// movle r0, r1
+// 
+// eor r0, r0, #1
+// eor r0, r1, r0
+// eorle r1, r0, #2
+// eorge r0, r0, lsr #2
+// 
+// movge r0, r1, lsl #1
+// movge r1, r0, lsr #2
+// mov r0, r1, rrx
+// 
+
+////////////////////////////////////////
+.ASM_INSTRUCTIONS
+
+INSTRUCTION = 
+| %MNEMONIC_2OPS% %REGISTER%, %Operand2%
+| %MNEMONIC_3OPS% %REGISTER%, %REGISTER%, %Operand2%
+;
+
+MNEMONIC_2OPS = 
+| mov
+| mov%CONDITIONAL%
+;
+
+MNEMONIC_3OPS = 
+| eor
+| eor%CONDITIONAL%
+;
+
+CONDITIONAL = 
+| ge
+| le
+;
+
+REGISTER = 
+| r0
+| r1
+;
+
+Operand2 = 
+| %REGISTER%
+| %REGISTER%, %SHIFTER%
+| %IMMEDIATE%
+;
+
+SHIFTER = 
+| lsl %REGISTER_OR_IMMEDIATE_SMALL%
+| lsr %REGISTER_OR_IMMEDIATE_SMALL%
+| rrx
+;
+
+REGISTER_OR_IMMEDIATE_SMALL =
+| %REGISTER
+| %IMMEDIATE_SMALL% 
+;
+
+IMMEDIATE = 
+| int_12_bits_constrained
+;
+
+IMMEDIATE_SMALL = 
+| int_4_bits
+;
+
+
+////////////////////////////////////////
+// todo ARM:
+// figure out valid move values
+// figure out load and store modules, with different addressing modes. 
+// contraints on various input immediates
+// 

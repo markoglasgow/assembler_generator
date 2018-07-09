@@ -12,42 +12,6 @@
 // mov al, 1
 
 ////////////////////////////////////////
-.INT_TYPES
-
-// All integer types must start with int
-// Each line in the integer definition lists constrains for that integer.
-
-int_signed_8_bits =
-& x <= 127
-& x >= -128
-;
-
-int_unsigned_8_bits =
-& x <= 255
-& x >= 0
-;
-
-int_signed_16_bits =
-& x <= 32767
-& x >= -32768
-;
-
-int_unsigned_16_bits =
-& x <= 65535
-& x >= 0
-;
-
-int_signed_32_bits =
-& x <= 2147483647
-& x >= −2147483648
-;
-
-int_unsigned_32_bits =
-& x <= 4294967295
-& x >= 0
-;
-
-////////////////////////////////////////
 .ASM_INSTRUCTIONS
 
 INSTRUCTION = 
@@ -107,7 +71,7 @@ POINTER =
 ;
 
 16_BIT_MEM_OP =
-| word POINTER
+| word %POINTER%
 ;
 
 16_BIT_IMMEDIATE =
@@ -121,7 +85,7 @@ POINTER =
 ;
 
 32_BIT_MEM_OP = 
-| dword POINTER
+| dword %POINTER%
 ;
 
 32_BIT_IMMEDIATE = 
@@ -136,3 +100,4 @@ POINTER =
 // labels, directives?
 // 
 // regular vs context free? I think we're regular.
+// detect recursive definitions in the grammar
