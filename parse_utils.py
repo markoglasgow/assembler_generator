@@ -46,7 +46,7 @@ class ParseUtils:
         return pos
 
     @staticmethod
-    def read_next_char(input_string, start_pos=0):
+    def read_next_char(input_string, start_pos=0) -> str:
         c = None
         if start_pos < len(input_string):
             c = input_string[start_pos]

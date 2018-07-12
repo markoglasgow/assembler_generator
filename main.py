@@ -9,8 +9,8 @@ def main():
     asm_grammar = AsmGrammarSpec()
     asm_grammar.read_spec(INPUT_ASM_GRAMMAR_SPEC)
 
-    #asm_parser = AsmParser(asm_grammar)
-    #asm_parser.parse_asm_listing(INPUT_ASM_LISTING)
+    asm_parser = AsmParser(asm_grammar)
+    asm_parser.parse_asm_listing(INPUT_ASM_LISTING)
 
     print("Read ASM grammar spec ok")
 
