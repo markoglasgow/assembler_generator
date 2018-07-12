@@ -97,7 +97,6 @@ POINTER =
 // TODO x86:
 // BLANK PLACEHOLDERS.
 // constraints on integer immediates. Parsing integer immediates.
-// think about precedence of matches (mov vs moveq vs movzx)
 // need to make pointer expressions more complex
 // labels, directives?
 // 

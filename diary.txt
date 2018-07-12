@@ -33,3 +33,9 @@ Goals/Evaluation:
 
 =======
 
+Notes July 10
+
+- Gotta worry about recursion in the asm spec definition. Have some way to detect and report it to the user. Document that it isn’t allowed.
+
+- Talk about how you track position in a stream instead of having API which consumes stream. 
+

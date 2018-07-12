@@ -1,9 +1,10 @@
 
 from parse_utils import ParseUtils
 from enum import Enum
+from typing import Dict
 
 
-class PatternTypes(Enum):
+class TokenTypes(Enum):
     WHITESPACE = 1
     RAW_TOKEN = 2
     PLACEHOLDER = 3
@@ -23,7 +24,7 @@ class AsmInstructionDefinition:
 
         if self.only_raw_values:
             for p in pattern:
-                if p[0] == PatternTypes.PLACEHOLDER:
+                if p[0] == TokenTypes.PLACEHOLDER:
                     self.only_raw_values = False
         return
 
@@ -32,7 +33,7 @@ class AsmGrammarSpec:
 
     def __init__(self):
         self.parsed_asm_instruction_types = False
-        self.spec = {}
+        self.spec = {}  # type: Dict[str, AsmInstructionDefinition]
         return
 
     def read_spec(self, spec_file_path):
@@ -173,15 +174,15 @@ class AsmGrammarSpec:
                         print("ERROR: Expected asm definition identifier to be terminated with %% character on line %s." % line_num)
                         raise ValueError
                     pos += 1
-                    pattern.append((PatternTypes.PLACEHOLDER, placeholder_name))
+                    pattern.append((TokenTypes.PLACEHOLDER, placeholder_name))
 
                 elif next_char == ' ':
-                    pattern.append((PatternTypes.WHITESPACE, " "))
+                    pattern.append((TokenTypes.WHITESPACE, " "))
                     pos = ParseUtils.skip_whitespace(line, pos)
 
                 else:
                     next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '%'])
-                    pattern.append((PatternTypes.RAW_TOKEN, next_token))
+                    pattern.append((TokenTypes.RAW_TOKEN, next_token))
 
         else:
             print("ERROR: Expected ';' or '|' on line %s, got '%s' instead" % (line_num, first_token))
@@ -189,6 +190,7 @@ class AsmGrammarSpec:
 
         return pattern
 
+    # TODO: Detect recursion in spec.
     def validate_spec(self):
 
         if "INSTRUCTION" not in self.spec:
@@ -198,7 +200,7 @@ class AsmGrammarSpec:
         for insn_defn_name, insn_defn in self.spec.items():
             for pattern in insn_defn.spec_patterns:
                 for pattern_item in pattern:
-                    if pattern_item[0] == PatternTypes.PLACEHOLDER:
+                    if pattern_item[0] == TokenTypes.PLACEHOLDER:
                         if pattern_item[1] not in self.spec:
                             print("Spec Validation Error: Instruction definition '%s' defined on line %s uses placeholder for undefined instruction definition '%s'" % (insn_defn_name, insn_defn.line_num, pattern_item[1]))
                             raise ValueError
