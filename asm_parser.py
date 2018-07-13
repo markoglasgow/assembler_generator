@@ -92,57 +92,12 @@ class AsmParser:
         possible_patterns = defn.spec_patterns
 
         for defn_row in range(len(possible_patterns)):
-            try_patterns = possible_patterns[defn_row]
+            token_pattern = possible_patterns[defn_row]
 
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
 
-            pattern_match = True
-            for defn_col in range(len(try_patterns)):
-                token_match = False
-                current_token = try_patterns[defn_col]
-
-                token_type = current_token[0]
-                token_value = current_token[1]
-
-                if token_type == TokenTypes.WHITESPACE:
-                    if self.read_line_char() is not None:
-                        if self.match_token(token_value) != TokenMatchType.NO_MATCH:
-                            self.skip_line_whitespace()
-                            token_match = True
-                        else:
-                            token_match = False
-                elif token_type == TokenTypes.RAW_TOKEN:
-                    if self.read_line_char() is not None:
-                        match_type = self.match_token(token_value)
-                        while match_type == TokenMatchType.PARTIAL_MATCH:
-                            if not self.read_line_char():
-                                match_type = TokenMatchType.NO_MATCH
-                                break
-                            match_type = self.match_token(token_value)
-
-                        if match_type == TokenMatchType.NO_MATCH:
-                            token_match = False
-                        elif match_type == TokenMatchType.EXACT_MATCH:
-                            token_match = True
-
-                elif token_type == TokenTypes.PLACEHOLDER:
-                    sub_defn = self.get_insn_defn(token_value)
-                    ret_val = self.match_defn(sub_defn)
-                    if ret_val is None or not ret_val:
-                        token_match = False
-                    else:
-                        token_match = True
-                else:
-                    print("ERROR. Unimplemented token type?")
-                    raise ValueError
-
-                if token_match:
-                    self.reset_token_buffer()
-                    continue
-                else:
-                    pattern_match = False
-                    break
+            pattern_match = self.try_match_token_pattern(token_pattern)
 
             if pattern_match:
                 return True
@@ -152,6 +107,78 @@ class AsmParser:
                 continue
 
         return False
+
+    def try_match_token_pattern(self, token_pattern):
+
+        pattern_match = False
+        for defn_col in range(len(token_pattern)):
+            token_match = False
+            current_token = token_pattern[defn_col]
+
+            token_type = current_token[0]
+            token_value = current_token[1]
+
+            if token_type == TokenTypes.WHITESPACE:
+                token_match = self.try_match_whitespace_token(token_value)
+            elif token_type == TokenTypes.RAW_TOKEN:
+                token_match = self.try_match_raw_token(token_value)
+            elif token_type == TokenTypes.PLACEHOLDER:
+                token_match = self.try_match_placeholder_token(token_value)
+            else:
+                print("ERROR. Unimplemented token type?")
+                raise ValueError
+
+            if token_match:
+                pattern_match = True
+                self.reset_token_buffer()
+                continue
+            else:
+                pattern_match = False
+                break
+
+        return pattern_match
+
+    def try_match_whitespace_token(self, token_value):
+        token_match = False
+
+        if self.read_line_char() is not None:
+            if self.match_token(token_value) != TokenMatchType.NO_MATCH:
+                self.skip_line_whitespace()
+                token_match = True
+            else:
+                token_match = False
+
+        return token_match
+
+    def try_match_raw_token(self, token_value):
+        token_match = False
+
+        if self.read_line_char() is not None:
+            match_type = self.match_token(token_value)
+            while match_type == TokenMatchType.PARTIAL_MATCH:
+                if not self.read_line_char():
+                    match_type = TokenMatchType.NO_MATCH
+                    break
+                match_type = self.match_token(token_value)
+
+            if match_type == TokenMatchType.NO_MATCH:
+                token_match = False
+            elif match_type == TokenMatchType.EXACT_MATCH:
+                token_match = True
+
+        return token_match
+
+    def try_match_placeholder_token(self, token_value):
+        token_match = False
+
+        sub_defn = self.get_insn_defn(token_value)
+        ret_val = self.match_defn(sub_defn)
+        if ret_val is None or not ret_val:
+            token_match = False
+        else:
+            token_match = True
+
+        return token_match
 
     def match_token(self, token_val):
 
