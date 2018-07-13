@@ -96,6 +96,7 @@ POINTER =
 ////////////////////////////////////////
 // TODO x86:
 // BLANK PLACEHOLDERS.
+// doesn't handle optional whitespace after commas correctly
 // constraints on integer immediates. Parsing integer immediates.
 // think about precedence of matches (mov vs moveq vs movzx)
 // need to make pointer expressions more complex

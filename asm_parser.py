@@ -89,59 +89,56 @@ class AsmParser:
 
     def match_defn(self, defn: AsmInstructionDefinition):
 
-        if not self.read_line_char():
-            return False
-
         possible_patterns = defn.spec_patterns
 
         for defn_row in range(len(possible_patterns)):
             try_patterns = possible_patterns[defn_row]
 
+            save_line_pos = self.line_pos
+            save_token_buffer = self.token_buffer
+
             pattern_match = True
             for defn_col in range(len(try_patterns)):
-                is_match = False
+                token_match = False
                 current_token = try_patterns[defn_col]
-
-                save_line_pos = self.line_pos
-                save_token_buffer = self.token_buffer
 
                 token_type = current_token[0]
                 token_value = current_token[1]
 
                 if token_type == TokenTypes.WHITESPACE:
-                    if self.match_token(token_value) != TokenMatchType.NO_MATCH:
-                        self.skip_line_whitespace()
-                        is_match = True
-                    else:
-                        is_match = False
+                    if self.read_line_char() is not None:
+                        if self.match_token(token_value) != TokenMatchType.NO_MATCH:
+                            self.skip_line_whitespace()
+                            token_match = True
+                        else:
+                            token_match = False
                 elif token_type == TokenTypes.RAW_TOKEN:
-                    match_type = self.match_token(token_value)
-                    while match_type == TokenMatchType.PARTIAL_MATCH:
-                        if not self.read_line_char():
-                            match_type = TokenMatchType.NO_MATCH
-                            break
+                    if self.read_line_char() is not None:
                         match_type = self.match_token(token_value)
+                        while match_type == TokenMatchType.PARTIAL_MATCH:
+                            if not self.read_line_char():
+                                match_type = TokenMatchType.NO_MATCH
+                                break
+                            match_type = self.match_token(token_value)
 
-                    if match_type == TokenMatchType.NO_MATCH:
-                        is_match = False
-                    elif match_type == TokenMatchType.EXACT_MATCH:
-                        is_match = True
+                        if match_type == TokenMatchType.NO_MATCH:
+                            token_match = False
+                        elif match_type == TokenMatchType.EXACT_MATCH:
+                            token_match = True
 
                 elif token_type == TokenTypes.PLACEHOLDER:
                     sub_defn = self.get_insn_defn(token_value)
                     ret_val = self.match_defn(sub_defn)
-                    if ret_val is None:
-                        is_match = False
+                    if ret_val is None or not ret_val:
+                        token_match = False
                     else:
-                        is_match = True
+                        token_match = True
                 else:
                     print("ERROR. Unimplemented token type?")
                     raise ValueError
 
-                if is_match:
+                if token_match:
                     self.reset_token_buffer()
-                    # TODO: Is this good?
-                    self.read_line_char()
                     continue
                 else:
                     pattern_match = False
@@ -150,11 +147,16 @@ class AsmParser:
             if pattern_match:
                 return True
             else:
+                self.line_pos = save_line_pos
+                self.token_buffer = save_token_buffer
                 continue
 
         return False
 
     def match_token(self, token_val):
+
+        if len(token_val) == 0:
+            return TokenMatchType.NO_MATCH
 
         if token_val == self.token_buffer:
             return TokenMatchType.EXACT_MATCH
