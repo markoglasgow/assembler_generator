@@ -83,6 +83,8 @@ class AsmParser:
     def parse_current_line(self):
 
         self.reset_token_buffer()
+        self.line_pos = 0
+
         instruction_node = self.parse_instruction()  # type: ASTNode
 
         self.add_ast_node(instruction_node)
