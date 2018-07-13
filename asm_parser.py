@@ -2,6 +2,7 @@
 from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes
 from parse_utils import ParseUtils
 from enum import Enum
+from typing import List
 
 
 class TokenMatchType(Enum):
@@ -10,12 +11,23 @@ class TokenMatchType(Enum):
     EXACT_MATCH = 2
 
 
+class ASTNode:
+
+    def __init__(self, token_type=None, token_value=None, child_nodes=None):
+        self.token_type = token_type    # type: TokenTypes
+        self.token_value = token_value  # type: str
+        if child_nodes is None:
+            self.child_nodes = []
+        else:
+            self.child_nodes = child_nodes
+
+
 class AsmParser:
 
     def __init__(self, spec: AsmGrammarSpec):
 
         self.spec = spec  # type: AsmGrammarSpec
-        self.ast = []
+        self.ast = []     # type: List[ASTNode]
 
         self.line_num = 0
         self.line = ""
@@ -64,25 +76,29 @@ class AsmParser:
         self.token_buffer = ""
         return
 
-    def add_ast_node(self, node):
+    def add_ast_node(self, node: ASTNode):
         self.ast.append(node)
         return
 
     def parse_current_line(self):
 
         self.reset_token_buffer()
-        instruction_node = self.parse_instruction()
+        instruction_node = self.parse_instruction()  # type: ASTNode
 
         self.add_ast_node(instruction_node)
 
         return
 
-    def parse_instruction(self):
+    def parse_instruction(self) -> ASTNode:
 
         instruction_defn = self.get_insn_defn("INSTRUCTION")  # type: AsmInstructionDefinition
-        self.match_defn(instruction_defn)
+        is_match, children = self.match_defn(instruction_defn)
 
-        return -1
+        if not is_match:
+            print("Assembler ERROR: Unable to parse INSTRUCTION on line %s" % (self.line_num+1))
+            raise ValueError
+
+        return ASTNode(TokenTypes.PLACEHOLDER, "INSTRUCTION", children)
 
     def get_insn_defn(self, insn_defn_name: str):
         return self.spec.spec[insn_defn_name]
@@ -97,22 +113,26 @@ class AsmParser:
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
 
-            pattern_match = self.try_match_token_pattern(token_pattern)
+            pattern_match, children = self.try_match_token_pattern(token_pattern)
 
             if pattern_match:
-                return True
+                return True, children
             else:
                 self.line_pos = save_line_pos
                 self.token_buffer = save_token_buffer
                 continue
 
-        return False
+        return False, []
 
     def try_match_token_pattern(self, token_pattern):
 
         pattern_match = False
+        child_nodes = []
+
         for defn_col in range(len(token_pattern)):
             token_match = False
+            ast_node = None
+            placeholder_children = None
             current_token = token_pattern[defn_col]
 
             token_type = current_token[0]
@@ -121,22 +141,30 @@ class AsmParser:
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
             elif token_type == TokenTypes.RAW_TOKEN:
-                token_match = self.try_match_raw_token(token_value)
+                token_match, ast_node = self.try_match_raw_token(token_value)
             elif token_type == TokenTypes.PLACEHOLDER:
-                token_match = self.try_match_placeholder_token(token_value)
+                token_match, placeholder_children = self.try_match_placeholder_token(token_value)
             else:
                 print("ERROR. Unimplemented token type?")
                 raise ValueError
 
             if token_match:
                 pattern_match = True
+
+                if ast_node is not None:
+                    child_nodes.append(ast_node)
+                if placeholder_children is not None:
+                    placeholder_node = ASTNode(TokenTypes.PLACEHOLDER, token_value, placeholder_children)
+                    child_nodes.append(placeholder_node)
+
                 self.reset_token_buffer()
                 continue
             else:
                 pattern_match = False
+                child_nodes = []
                 break
 
-        return pattern_match
+        return pattern_match, child_nodes
 
     def try_match_whitespace_token(self, token_value):
         token_match = False
@@ -152,6 +180,7 @@ class AsmParser:
 
     def try_match_raw_token(self, token_value):
         token_match = False
+        ast_node = ASTNode()
 
         if self.read_line_char() is not None:
             match_type = self.match_token(token_value)
@@ -165,20 +194,13 @@ class AsmParser:
                 token_match = False
             elif match_type == TokenMatchType.EXACT_MATCH:
                 token_match = True
+                ast_node = ASTNode(TokenTypes.RAW_TOKEN, token_value)
 
-        return token_match
+        return token_match, ast_node
 
     def try_match_placeholder_token(self, token_value):
-        token_match = False
-
         sub_defn = self.get_insn_defn(token_value)
-        ret_val = self.match_defn(sub_defn)
-        if ret_val is None or not ret_val:
-            token_match = False
-        else:
-            token_match = True
-
-        return token_match
+        return self.match_defn(sub_defn)
 
     def match_token(self, token_val):
 
