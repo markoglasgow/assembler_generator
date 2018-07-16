@@ -94,7 +94,7 @@ class AsmParser:
     def parse_instruction(self) -> ASTNode:
 
         instruction_defn = self.get_insn_defn("INSTRUCTION")  # type: AsmInstructionDefinition
-        is_match, children = self.match_defn(instruction_defn)
+        is_match, children = self.match_defn(instruction_defn, top_level=True)
 
         if not is_match:
             print("Assembler ERROR: Unable to parse INSTRUCTION on line %s" % (self.line_num+1))
@@ -105,7 +105,7 @@ class AsmParser:
     def get_insn_defn(self, insn_defn_name: str):
         return self.spec.spec[insn_defn_name]
 
-    def match_defn(self, defn: AsmInstructionDefinition):
+    def match_defn(self, defn: AsmInstructionDefinition, top_level=False):
 
         possible_patterns = defn.spec_patterns
 
@@ -116,6 +116,11 @@ class AsmParser:
             save_token_buffer = self.token_buffer
 
             pattern_match, children = self.try_match_token_pattern(token_pattern)
+
+            if top_level and pattern_match:
+                # Check if the rest of the line is empty if we're trying to match the
+                # top-level pattern
+                pattern_match = self.is_rest_empty()
 
             if pattern_match:
                 return True, children
@@ -171,7 +176,7 @@ class AsmParser:
     def try_match_whitespace_token(self, token_value):
         token_match = False
 
-        if self.read_line_char() is not None:
+        if self.read_line_char() is not False:
             if self.match_token(token_value) != TokenMatchType.NO_MATCH:
                 self.skip_line_whitespace()
                 token_match = True
@@ -184,7 +189,7 @@ class AsmParser:
         token_match = False
         ast_node = ASTNode()
 
-        if self.read_line_char() is not None:
+        if self.read_line_char() is not False:
             match_type = self.match_token(token_value)
             while match_type == TokenMatchType.PARTIAL_MATCH:
                 if not self.read_line_char():
@@ -215,3 +220,17 @@ class AsmParser:
             return TokenMatchType.PARTIAL_MATCH
         else:
             return TokenMatchType.NO_MATCH
+
+    def is_rest_empty(self):
+        while self.read_line_char() is not False:
+            c = self.token_buffer[-1:]
+
+            # TODO: Add support for other comment characters. Check that comment char is not in string literal.
+            if c == ';':
+                return True
+            elif c == ' ':
+                continue
+            else:
+                return False
+
+        return True

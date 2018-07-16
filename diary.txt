@@ -39,3 +39,9 @@ Notes July 10
 
 - Talk about how you track position in a stream instead of having API which consumes stream. 
 
+=======
+
+July 16.
+
+- Finished pretty printing of first parsed AST 4 days ago
+- added support for comments at end of line, trailing spaces at end of line

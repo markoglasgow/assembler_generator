@@ -23,13 +23,13 @@ INSTRUCTION =
 ;
 
 MNEMONIC_2OPS = 
-| mov
 | mov%CONDITIONAL%
+| mov
 ;
 
 MNEMONIC_3OPS = 
-| eor
 | eor%CONDITIONAL%
+| eor
 ;
 
 CONDITIONAL = 

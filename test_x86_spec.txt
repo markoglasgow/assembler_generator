@@ -96,10 +96,14 @@ POINTER =
 ////////////////////////////////////////
 // TODO x86:
 // optional whitespaces?
-// doesn't handle optional whitespace after commas correctly
+// doesn't handle optional whitespace after commas ',' correctly
+// support tabs \t and whitespaces
 // constraints on integer immediates. Parsing integer immediates.
-// think about precedence of matches (mov vs moveq vs movzx)
-// think about optional matches (mov vs moveq)
+// x think about precedence of matches (mov vs moveq vs movzx)
+// x think about optional matches (mov vs moveq)
+
+// build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
+// consider putting bit image format stuff in the grammar spec. e.x. 0001b %TWO_OPERANDS 0100b
 
 // need to make pointer expressions more complex
 // labels, directives?
