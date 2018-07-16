@@ -11,6 +11,7 @@
 // mov eax, 1
 // mov al, 1
 
+
 ////////////////////////////////////////
 .ASM_INSTRUCTIONS
 
@@ -108,5 +109,4 @@ POINTER =
 // need to make pointer expressions more complex
 // labels, directives?
 // 
-// regular vs context free? I think we're regular.
 // detect recursive definitions in the grammar

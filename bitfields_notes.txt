@@ -1,0 +1,157 @@
+===============================
+
+MNEMONIC_2OPS.'mov'
+-> set opcode 100010
+
+TWO_OPERANDS    
+-> set_present(mod, reg, rm)
+
+TWO_OPERANDS.'%8_BIT_REG%, %8_BIT_MEM_OP%'
+->  set opcode_d 1 
+    set mod 00
+    set reg %8_BIT_REG%   ; this is destination register
+    set rm %32_BIT_REG%
+
+TWO_OPERANDS.8_BIT_REG.'al'
+->  emit 000
+
+TWO_OPERANDS.8_BIT_MEM_OP.POINTER.32_BIT_REG.'eax'
+->  emit 000
+
+===============================
+
+INSTRUCTION
+    MNEMONIC_2OPS               :: set_present(opcode, opcode_d, opcode_s, mod, reg, rm)
+        'mov'                   :: opcode=1000 10
+    TWO_OPERANDS                
+        8_BIT_REG               :: operand_d=1 :: operand_s=0 :: reg=%8_BIT_REG%       
+            'al'                :: emit 000
+        ','
+        8_BIT_MEM_OP            :: mod = 00
+            'byte'
+            POINTER
+                'ptr['          :: mod = 00 :: rm = %32_BIT_REG%
+                32_BIT_REG      
+                    'eax'       :: emit 000
+                ']'
+
+===============================
+
+.BIT_FIELDS
+
+name: prefix
+size: 8
+
+name: opcode
+size: 6
+
+name: opcode_d
+size: 1
+
+name: opcode_s
+size: 1
+
+name: mod
+size: 2
+
+name: reg
+size: 3
+
+name: rm
+size: 3
+
+name: scale
+size: 2
+
+name: index
+size: 3
+
+name: base
+size: 3
+
+name: displacement
+size: 8
+
+name: immediate
+size: 8
+
+===============================
+
+INSTRUCTION = 
+| %MNEMONIC_2OPS% %TWO_OPERANDS%            :: set_present(opcode, opcode_d, opcode_s, mod, reg, rm)
+;
+
+MNEMONIC_2OPS =
+| mov                                       :: opcode=1000 10
+| xor                                       :: opcode=0011 00
+;
+
+TWO_OPERANDS =
+| %8_BIT_REG%, %8_BIT_IMMEDIATE%
+| %8_BIT_REG%, %8_BIT_MEM_OP%               :: opcode_d=1 :: opcode_s=0 :: mod=00 :: reg=%8_BIT_REG%
+| %8_BIT_REG%, %8_BIT_REG%
+
+| %8_BIT_MEM_OP%, %8_BIT_REG%
+| %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%
+
+| %16_BIT_REG%, %16_BIT_IMMEDIATE%
+| %16_BIT_REG%, %16_BIT_MEM_OP%
+| %16_BIT_REG%, %16_BIT_REG%
+
+| %16_BIT_MEM_OP%, %16_BIT_REG%
+| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%
+
+| %32_BIT_REG%, %32_BIT_IMMEDIATE%
+| %32_BIT_REG%, %32_BIT_MEM_OP%
+| %32_BIT_REG%, %32_BIT_REG%
+
+| %32_BIT_MEM_OP%, %32_BIT_REG%
+| %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%
+;
+
+8_BIT_REG =
+| al                                        :: emit 000
+| bl                                        :: emit 011
+;
+
+POINTER = 
+| ptr[%32_BIT_REG%]                         :: mod=00 :: rm = %32_BIT_REG%
+| ptr[%32_BIT_IMMEDIATE%]                   :: mod=00 :: rm = 101 :: set_present(immediate) :: set_size(immediate, 32) :: immediate = %32_BIT_IMMEDIATE%
+;
+
+8_BIT_MEM_OP = 
+| byte %POINTER%
+;
+
+8_BIT_IMMEDIATE = 
+| int_unsigned_8_bits
+| int_signed_8_bits
+;
+
+16_BIT_REG =
+| ax
+| bx
+;
+
+16_BIT_MEM_OP =
+| word %POINTER%
+;
+
+16_BIT_IMMEDIATE =
+| int_unsigned_16_bits
+| int_signed_16_bits
+;
+
+32_BIT_REG =
+| eax                                        :: emit 000
+| ebx                                        :: emit 011
+;
+
+32_BIT_MEM_OP = 
+| dword %POINTER%
+;
+
+32_BIT_IMMEDIATE = 
+| int_unsigned_32_bits
+| int_signed_32_bits
+;

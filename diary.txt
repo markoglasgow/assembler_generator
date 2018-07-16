@@ -2,6 +2,7 @@ Development July 8
 
 - Created a grammar, simple regular grammar
 - Recursive definitions not allowed
+- Talk about regular vs context free grammars in paper?
 
 Grammar has two sections, one for 
 
@@ -45,3 +46,6 @@ July 16.
 
 - Finished pretty printing of first parsed AST 4 days ago
 - added support for comments at end of line, trailing spaces at end of line
+- got first version of ARM parsing and AST printing to work.
+
+- thinking about bitfield definitions, and how to add bitfield modifications to spec.
