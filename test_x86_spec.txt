@@ -11,6 +11,53 @@
 // mov eax, 1
 // mov al, 1
 
+// x86 instruction encoding:
+// http://www.c-jump.com/CIS77/CPU/x86/lecture.html
+
+////////////////////////////////////////
+.BIT_FIELDS
+
+name: prefix
+size: 8
+
+name: opcode
+size: 6
+
+name: opcode_d
+size: 1
+
+name: opcode_s
+size: 1
+
+name: mod
+size: 2
+
+name: reg
+size: 3
+
+name: rm
+size: 3
+
+name: scale
+size: 2
+
+name: index
+size: 3
+
+name: base
+size: 3
+
+name: displacement
+size: 8
+
+name: immediate_8
+size: 8
+
+name: immediate_16
+size: 16
+
+name: immediate_32
+size: 32
 
 ////////////////////////////////////////
 .ASM_INSTRUCTIONS
@@ -100,8 +147,7 @@ POINTER =
 // doesn't handle optional whitespace after commas ',' correctly
 // support tabs \t and whitespaces
 // constraints on integer immediates. Parsing integer immediates.
-// x think about precedence of matches (mov vs moveq vs movzx)
-// x think about optional matches (mov vs moveq)
+// Plugin system for parsing integer immediates, and emitting their bitcode.
 
 // build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
 // consider putting bit image format stuff in the grammar spec. e.x. 0001b %TWO_OPERANDS 0100b
@@ -112,8 +158,3 @@ POINTER =
 // detect recursive definitions in the grammar
 //
 // burroughs 5500 
-// burroughs 6500 / 6800. book by Elliot Organic. University of Utah. 
-// algol assembly. 
-// burroughs 1700 . John O'Donnell. 
-
-

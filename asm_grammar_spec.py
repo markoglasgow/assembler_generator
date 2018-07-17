@@ -1,7 +1,15 @@
 
 from parse_utils import ParseUtils
 from enum import Enum
-from typing import Dict
+from typing import Dict, List
+
+
+class BitfieldDefinition:
+
+    def __init__(self, name, size):
+        self.name = name
+        self.size = size
+        return
 
 
 class TokenTypes(Enum):
@@ -33,11 +41,20 @@ class AsmGrammarSpec:
 
     def __init__(self):
         self.parsed_asm_instruction_types = False
+        self.parsed_bitfields_definitions = False
         self.spec = {}  # type: Dict[str, AsmInstructionDefinition]
+
+        self.bitfields = []  # type: List[BitfieldDefinition]
+        self.bitfield_indexes_map = {}  # type: Dict[str, int]
+
+        return
+
+    def add_bitfield(self, bitfield: BitfieldDefinition):
+        self.bitfields.append(bitfield)
+        self.bitfield_indexes_map[bitfield.name] = len(self.bitfields) - 1
         return
 
     def read_spec(self, spec_file_path):
-        input_file = ""
         with open(spec_file_path, "r") as f:
             input_file = f.readlines()
 
@@ -58,9 +75,18 @@ class AsmGrammarSpec:
                 line_num += 1
                 continue
 
-            if line == ".ASM_INSTRUCTIONS":
+            if line == ".BIT_FIELDS":
+                if self.parsed_bitfields_definitions:
+                    print("ERROR: duplicate .BIT_FIELDS directive (line %s)" % (line_num+1))
+                    raise ValueError
+
+                line_num = self.parse_bitfield_definitions(line_num, spec_file_lines)
+                self.parsed_bitfields_definitions = True
+                continue
+
+            elif line == ".ASM_INSTRUCTIONS":
                 if self.parsed_asm_instruction_types:
-                    print("ERROR: duplicate .ASM_INSTRUCTIONS directive (line %s)" % line_num)
+                    print("ERROR: duplicate .ASM_INSTRUCTIONS directive (line %s)" % (line_num+1))
                     raise ValueError
 
                 self.parse_asm_instructions_spec(line_num, spec_file_lines)
@@ -73,13 +99,90 @@ class AsmGrammarSpec:
             print("ERROR: .ASM_INSTRUCTIONS directive was not found in spec file!")
             raise ValueError
 
+        if not self.parsed_bitfields_definitions:
+            print("ERROR: .BIT_FIELDS directive was not found in spec file!")
+            raise ValueError
+
         return
+
+    def parse_bitfield_definitions(self, start_line_num, spec_file_lines):
+
+        line_num = start_line_num
+        if not spec_file_lines[line_num].startswith(".BIT_FIELDS"):
+            print("ERROR: Parsing bitfield definitions, but current line doesn't start with .BIT_FIELDS (line %s)" % (line_num+1))
+
+        line_num += 1
+
+        while line_num < len(spec_file_lines):
+
+            line = spec_file_lines[line_num].strip()
+
+            # Skip empty lines and comments
+            if len(line) == 0 or line.startswith("//"):
+                line_num += 1
+                continue
+
+            if line == ".ASM_INSTRUCTIONS":
+                return line_num - 1
+
+            bitfield_name_line_num = line_num
+            bitfield_size_line_num = line_num+1
+
+            if bitfield_size_line_num >= len(spec_file_lines):
+                print("ERROR: EOL after line %s when attempting to read bitfield size" % (line_num+1))
+                raise ValueError
+
+            bitfield_name_line = spec_file_lines[bitfield_name_line_num]
+            bitfield_size_line = spec_file_lines[bitfield_size_line_num]
+
+            bitfield_name = self.parse_bitfield_name(bitfield_name_line, bitfield_name_line_num)
+            bitfield_size = self.parse_bitfield_size(bitfield_size_line, bitfield_size_line_num)
+
+            self.add_bitfield(BitfieldDefinition(bitfield_name, bitfield_size))
+
+        print("ERROR: .ASM_INSTRUCTIONS is not present in spec file after .BIT_FIELDS")
+        raise ValueError
+
+    def parse_bitfield_name(self, name_line: str, line_num: int):
+
+        if not name_line.startswith("name:"):
+            print("ERROR: Bitfield definition name on line %s must start with 'name:'" % (line_num+1))
+            raise ValueError
+
+        pos = len("name:")
+        pos = ParseUtils.skip_whitespace(name_line, pos)
+
+        bitfield_name, pos = ParseUtils.read_identifier(name_line, pos)
+
+        # After reading the name of the bitfield, make sure the rest of the line is empty.
+        if not ParseUtils.is_rest_empty(name_line, pos):
+            print("ERROR: Extra characters present on line %s after bitfield name" % (line_num+1))
+            raise ValueError
+
+        return bitfield_name
+
+    def parse_bitfield_size(self, size_line: str, line_num: int):
+        if not size_line.startswith("size:"):
+            print("ERROR: Bitfield definition size on line %s must start with 'size:'" % (line_num+1))
+            raise ValueError
+
+        pos = len("size:")
+        pos = ParseUtils.skip_whitespace(size_line, pos)
+
+        bitfield_size, pos = ParseUtils.read_number(size_line, pos)
+
+        # After reading the name of the bitfield, make sure the rest of the line is empty.
+        if not ParseUtils.is_rest_empty(size_line, pos):
+            print("ERROR: Extra characters present on line %s after bitfield size" % (line_num+1))
+            raise ValueError
+
+        return bitfield_size
 
     def parse_asm_instructions_spec(self, start_line_num, spec_file_lines):
 
         line_num = start_line_num
         if not spec_file_lines[line_num].startswith(".ASM_INSTRUCTIONS"):
-            print("ERROR: Parsing asm instructions directive, but current line doesn't start with .ASM_INSTRUCTIONS (line %s)" % line_num)
+            print("ERROR: Parsing asm instructions directive, but current line doesn't start with .ASM_INSTRUCTIONS (line %s)" % (line_num+1))
             raise ValueError
 
         line_num += 1
