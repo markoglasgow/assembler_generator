@@ -110,3 +110,10 @@ POINTER =
 // labels, directives?
 // 
 // detect recursive definitions in the grammar
+//
+// burroughs 5500 
+// burroughs 6500 / 6800. book by Elliot Organic. University of Utah. 
+// algol assembly. 
+// burroughs 1700 . John O'Donnell. 
+
+
