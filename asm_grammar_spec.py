@@ -123,7 +123,7 @@ class AsmGrammarSpec:
                 continue
 
             if line == ".ASM_INSTRUCTIONS":
-                return line_num - 1
+                return line_num
 
             bitfield_name_line_num = line_num
             bitfield_size_line_num = line_num+1
@@ -132,13 +132,15 @@ class AsmGrammarSpec:
                 print("ERROR: EOL after line %s when attempting to read bitfield size" % (line_num+1))
                 raise ValueError
 
-            bitfield_name_line = spec_file_lines[bitfield_name_line_num]
-            bitfield_size_line = spec_file_lines[bitfield_size_line_num]
+            bitfield_name_line = spec_file_lines[bitfield_name_line_num].strip()
+            bitfield_size_line = spec_file_lines[bitfield_size_line_num].strip()
 
             bitfield_name = self.parse_bitfield_name(bitfield_name_line, bitfield_name_line_num)
             bitfield_size = self.parse_bitfield_size(bitfield_size_line, bitfield_size_line_num)
 
             self.add_bitfield(BitfieldDefinition(bitfield_name, bitfield_size))
+
+            line_num += 2
 
         print("ERROR: .ASM_INSTRUCTIONS is not present in spec file after .BIT_FIELDS")
         raise ValueError
@@ -174,6 +176,12 @@ class AsmGrammarSpec:
         # After reading the name of the bitfield, make sure the rest of the line is empty.
         if not ParseUtils.is_rest_empty(size_line, pos):
             print("ERROR: Extra characters present on line %s after bitfield size" % (line_num+1))
+            raise ValueError
+
+        try:
+            bitfield_size = int(bitfield_size)
+        except ValueError:
+            print("ERROR: Unable to parse the number for bitfield size on line %s" % (line_num+1))
             raise ValueError
 
         return bitfield_size

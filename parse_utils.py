@@ -62,7 +62,7 @@ class ParseUtils:
         return c
 
     @staticmethod
-    def is_rest_empty(self, input_string, start_pos=0):
+    def is_rest_empty(input_string, start_pos=0):
 
         pos = ParseUtils.skip_whitespace(input_string, start_pos)
         if pos == len(input_string):
