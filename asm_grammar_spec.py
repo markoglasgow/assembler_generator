@@ -1,7 +1,7 @@
 
 from parse_utils import ParseUtils
 from enum import Enum
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 class BitfieldDefinition:
@@ -18,20 +18,42 @@ class TokenTypes(Enum):
     PLACEHOLDER = 3
 
 
+class ModifierTypes(Enum):
+    MODIFIER = 1
+    PLACEHOLDER = 2
+    EMIT = 3
+
+
+class BitfieldModifier:
+
+    def __init__(self, modifier_type, bitfield_name, modifier_value):
+        self.modifier_type = modifier_type
+        self.bitfield_name = bitfield_name
+        self.modifier_value = modifier_value
+
+
+class DefinitionPattern:
+
+    def __init__(self, token_patterns, bitfield_modifiers):
+        self.token_patterns = token_patterns
+        self.bitfield_modifiers = bitfield_modifiers  # type: List[BitfieldModifier]
+
+
 class AsmInstructionDefinition:
 
     def __init__(self, name, line_num):
         self.name = name
         self.line_num = line_num
-        self.spec_patterns = []
+        self.spec_patterns = []  # type: List[DefinitionPattern]
         self.only_raw_values = True
         return
 
-    def add_pattern(self, pattern):
+    def add_pattern(self, pattern: DefinitionPattern):
         self.spec_patterns.append(pattern)
 
+        # TODO: Potentially remove this code
         if self.only_raw_values:
-            for p in pattern:
+            for p in pattern.token_patterns:
                 if p[0] == TokenTypes.PLACEHOLDER:
                     self.only_raw_values = False
         return
@@ -208,7 +230,7 @@ class AsmGrammarSpec:
             asm_defn, line_num = self.parse_single_asm_instr_defn(line_num, spec_file_lines)
 
             if asm_defn.name in self.spec:
-                print("ERROR: Duplicate instruction definition found: '%s' (line %s)" % (asm_defn.name, instr_defn_line))
+                print("ERROR: Duplicate instruction definition found: '%s' (line %s)" % (asm_defn.name, instr_defn_line+1))
                 raise ValueError
 
             self.spec[asm_defn.name] = asm_defn
@@ -230,15 +252,15 @@ class AsmGrammarSpec:
             pattern = None
             if len(line) > 0:
                 pattern = self.read_asm_defn_pattern(line, line_num)
+
             line_num += 1
-            if pattern is not None:
-                if len(pattern) == 0:
-                    break
-                else:
-                    asm_defn.add_pattern(pattern)
+            if pattern is None:
+                break
+            else:
+                asm_defn.add_pattern(pattern)
 
         if len(asm_defn.spec_patterns) == 0:
-            print("ERROR: Empty instruction definition on line %s" % start_line_num)
+            print("ERROR: Empty instruction definition on line %s" % (line_num+1))
             raise ValueError
 
         return asm_defn, line_num
@@ -248,25 +270,26 @@ class AsmGrammarSpec:
         name, pos = ParseUtils.read_identifier(line)
 
         if len(name) == 0:
-            print("ERROR: Unable to read definition identifier on line %s." % line_num)
+            print("ERROR: Unable to read definition identifier on line %s." % (line_num+1))
             raise ValueError
 
         # Expect a '=' after the identifier
         token, pos = ParseUtils.read_token(line, pos)
 
         if token != "=":
-            print("ERROR: Expected '=' after definition identifier on line %s" % line_num)
+            print("ERROR: Expected '=' after definition identifier on line %s" % (line_num+1))
             raise ValueError
 
         return name
 
-    def read_asm_defn_pattern(self, line, line_num):
+    def read_asm_defn_pattern(self, line, line_num) -> Optional[DefinitionPattern]:
 
-        pattern = []
+        pattern_tokens = []
+        bitfield_modifiers = []
         first_token, pos = ParseUtils.read_token(line, 0, break_chars=[' '], valid_chars={"|": "", ";": ""})
 
         if first_token == ";":
-            return []
+            return None
 
         elif first_token == "|":
             pos = ParseUtils.skip_whitespace(line, pos)
@@ -274,7 +297,7 @@ class AsmGrammarSpec:
             while pos < len(line):
                 next_char = ParseUtils.read_next_char(line, pos)
                 if next_char is None:
-                    print("ERROR: Expected asm instruction patterns on line %s after '|'." % line_num)
+                    print("ERROR: Expected asm instruction patterns on line %s after '|'." % (line_num+1))
                     raise ValueError
 
                 elif next_char == '%':
@@ -282,26 +305,94 @@ class AsmGrammarSpec:
                     placeholder_name, pos = ParseUtils.read_identifier(line, pos)
                     next_char = ParseUtils.read_next_char(line, pos)
                     if next_char != "%":
-                        print("ERROR: Expected asm definition identifier to be terminated with %% character on line %s." % line_num)
+                        print("ERROR: Expected asm definition identifier to be terminated with %% character on line %s." % (line_num+1))
                         raise ValueError
                     pos += 1
-                    pattern.append((TokenTypes.PLACEHOLDER, placeholder_name))
+                    pattern_tokens.append((TokenTypes.PLACEHOLDER, placeholder_name))
 
                 elif next_char == ' ':
-                    pattern.append((TokenTypes.WHITESPACE, " "))
+                    pattern_tokens.append((TokenTypes.WHITESPACE, " "))
                     pos = ParseUtils.skip_whitespace(line, pos)
+
+                elif next_char == ':':
+                    pos += 1
+                    next_char = ParseUtils.read_next_char(line, pos)
+                    if next_char == ':':
+                        pos += 1
+                        str_modifiers = line[pos:]
+                        bitfield_modifiers = self.read_bitfield_modifiers(str_modifiers, line_num)
+                        break
+                    else:
+                        print("ERROR: Unexpected ':' character on line %s" % (line_num+1))
+                        raise ValueError
 
                 else:
                     next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '%'])
-                    pattern.append((TokenTypes.RAW_TOKEN, next_token))
+                    pattern_tokens.append((TokenTypes.RAW_TOKEN, next_token))
 
         else:
-            print("ERROR: Expected ';' or '|' on line %s, got '%s' instead" % (line_num, first_token))
+            print("ERROR: Expected ';' or '|' on line %s, got '%s' instead" % ((line_num+1), first_token))
             raise ValueError
 
-        return pattern
+        return DefinitionPattern(pattern_tokens, bitfield_modifiers)
+
+    def read_bitfield_modifiers(self, raw_bitfield_modifiers: str, line_num: int) -> List[BitfieldModifier]:
+
+        modifiers_arr = []
+        modifiers_str_arr = raw_bitfield_modifiers.split("::")
+        for m_str in modifiers_str_arr:
+            modifier_string = m_str.replace(" ", "").replace("\t", "")
+            modifiers_arr.append(self.parse_modifier_string(modifier_string, line_num))
+
+        return modifiers_arr
+
+    def parse_modifier_string(self, modifier_string, line_num) -> BitfieldModifier:
+
+        if modifier_string.startswith("emit"):
+            emit_arr = modifier_string.split()
+            if len(emit_arr) != 2:
+                print("ERROR: Unable to parse bitfield modifier '%s' on line %s" % (modifier_string, line_num+1))
+                raise ValueError
+            modifier_value = self.read_modifier_value(emit_arr[1])
+            if modifier_value is None:
+                print("ERROR: Unable to parse bitfield modifier value '%s' on line %s" % (emit_arr[1], line_num + 1))
+                raise ValueError
+            return BitfieldModifier(ModifierTypes.EMIT, None, modifier_value)
+
+        elif "=" in modifier_string:
+            modifier_arr = modifier_string.split("=")
+
+            if len(modifier_arr) != 2:
+                print("ERROR: Unable to parse bitfield modifier '%s' on line %s" % (modifier_string, line_num+1))
+                raise ValueError
+
+            bitfield_name = modifier_arr[0]
+            if bitfield_name not in self.bitfield_indexes_map:
+                print("ERROR: Trying to assign to unknown bitfield '%s' in bitfield modifier on line '%s" % (bitfield_name, line_num+1))
+                raise ValueError
+
+            bitfield_value = modifier_arr[1]
+            if bitfield_value.startswith("%") and bitfield_value.endswith("%"):
+                bitfield_value = bitfield_value.replace("%", "")
+                return BitfieldModifier(ModifierTypes.PLACEHOLDER, bitfield_name, bitfield_value)
+
+            bitfield_value = self.read_modifier_value(bitfield_value)
+            if bitfield_value is None:
+                print("ERROR: Unable to parse bitfield modifier value '%s' on line %s" % (modifier_arr[1], line_num + 1))
+                raise ValueError
+
+            return BitfieldModifier(ModifierTypes.MODIFIER, bitfield_name, bitfield_value)
+
+        else:
+            print("ERROR: Unable to parse bitfield modifier '%s' on line %s" % (modifier_string, line_num + 1))
+            raise ValueError
+
+    def read_modifier_value(self, value_string):
+        # TODO: Implement function only allowing 1's and 0'
+        return value_string
 
     # TODO: Detect recursion in spec.
+    # TODO: Detect is bitfield modifier placeholder depends on an unidentified pattern.
     def validate_spec(self):
 
         if "INSTRUCTION" not in self.spec:
@@ -310,10 +401,10 @@ class AsmGrammarSpec:
 
         for insn_defn_name, insn_defn in self.spec.items():
             for pattern in insn_defn.spec_patterns:
-                for pattern_item in pattern:
+                for pattern_item in pattern.token_patterns:
                     if pattern_item[0] == TokenTypes.PLACEHOLDER:
                         if pattern_item[1] not in self.spec:
-                            print("Spec Validation Error: Instruction definition '%s' defined on line %s uses placeholder for undefined instruction definition '%s'" % (insn_defn_name, insn_defn.line_num, pattern_item[1]))
+                            print("Spec Validation Error: Instruction definition '%s' defined on line %s uses placeholder for undefined instruction definition '%s'" % (insn_defn_name, insn_defn.line_num+1, pattern_item[1]))
                             raise ValueError
 
         return

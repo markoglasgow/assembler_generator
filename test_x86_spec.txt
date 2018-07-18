@@ -67,8 +67,8 @@ INSTRUCTION =
 ;
 
 MNEMONIC_2OPS =
-| mov
-| xor
+| mov                                       :: opcode=1000 10
+| xor                                       :: opcode=0011 00
 ;
 
 TWO_OPERANDS =

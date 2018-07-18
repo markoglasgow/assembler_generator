@@ -110,7 +110,7 @@ class AsmParser:
         possible_patterns = defn.spec_patterns
 
         for defn_row in range(len(possible_patterns)):
-            token_pattern = possible_patterns[defn_row]
+            token_pattern = possible_patterns[defn_row].token_patterns
 
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
@@ -137,6 +137,7 @@ class AsmParser:
         child_nodes = []
 
         for defn_col in range(len(token_pattern)):
+            # noinspection PyUnusedLocal
             token_match = False
             ast_node = None
             placeholder_children = None
