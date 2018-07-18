@@ -249,18 +249,17 @@ class AsmGrammarSpec:
 
         while line_num < len(spec_file_lines):
             line = spec_file_lines[line_num].strip()
-            pattern = None
+            line_num += 1
+
             if len(line) > 0:
                 pattern = self.read_asm_defn_pattern(line, line_num)
-
-            line_num += 1
-            if pattern is None:
-                break
-            else:
-                asm_defn.add_pattern(pattern)
+                if pattern is None:
+                    break
+                else:
+                    asm_defn.add_pattern(pattern)
 
         if len(asm_defn.spec_patterns) == 0:
-            print("ERROR: Empty instruction definition on line %s" % (line_num+1))
+            print("ERROR: Empty instruction definition on line %s" % (start_line_num+1))
             raise ValueError
 
         return asm_defn, line_num
@@ -321,6 +320,10 @@ class AsmGrammarSpec:
                         pos += 1
                         str_modifiers = line[pos:]
                         bitfield_modifiers = self.read_bitfield_modifiers(str_modifiers, line_num)
+
+                        if pattern_tokens[-1][0] == TokenTypes.WHITESPACE:
+                            del pattern_tokens[-1]
+
                         break
                     else:
                         print("ERROR: Unexpected ':' character on line %s" % (line_num+1))
