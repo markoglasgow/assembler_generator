@@ -21,9 +21,9 @@ class ASTNode:
         else:
             self.child_nodes = child_nodes
         if bitfield_modifiers is None:
-            self.bitfield_modifiers = []
+            self.bitfield_modifiers = []                  # type: List[BitfieldModifier]
         else:
-            self.bitfield_modifiers = bitfield_modifiers
+            self.bitfield_modifiers = bitfield_modifiers  # type: List[BitfieldModifier]
 
 
 class AsmParser:
