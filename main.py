@@ -16,7 +16,9 @@ def main():
 
     asm_parser = AsmParser(asm_grammar)
     asm_parser.parse_asm_listing(INPUT_ASM_LISTING)
-    print("Parsed ASM listing ok\n\n")
+    print("Parsed ASM listing ok")
+
+    print("\n\n")
 
     pretty_print_ast(asm_parser.ast)
 
