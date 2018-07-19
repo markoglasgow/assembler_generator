@@ -49,3 +49,23 @@ July 16.
 - got first version of ARM parsing and AST printing to work.
 
 - thinking about bitfield definitions, and how to add bitfield modifications to spec.
+
+=======
+
+July 17.
+
+Meeting, examine Burroughts arch by next meeting
+Implemented declarations for bitfields in spec
+
+=======
+
+July 18.
+
+Implemented bitfield modifiers syntax in spec. Works alongside the grammar
+
+=======
+
+July 19.
+
+Implemented printing for bitfield modifiers in the AST. 
+Consider using 'bitstring' package for bit manipulations. Can talk about decision to use 'bitstring' instead of 'BitArray' (one is pure Python, one is C)

@@ -158,3 +158,5 @@ POINTER =
 // detect recursive definitions in the grammar
 //
 // burroughs 5500 
+// BitArray: 
+// https://pythonhosted.org/bitstring/index.html

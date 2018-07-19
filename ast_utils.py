@@ -30,6 +30,9 @@ def pretty_print_ast(ast: List[ASTNode], indentation=0):
 
 def pretty_print_ast_node(ast_node: ASTNode, indentation: int):
 
+    if len(ast_node.original_line) > 0:
+        print_buffer.append(indent_by(indentation) + ast_node.original_line)
+
     if ast_node.token_type == TokenTypes.WHITESPACE:
         return
 

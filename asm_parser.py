@@ -16,6 +16,7 @@ class ASTNode:
     def __init__(self, token_type=None, token_value=None, child_nodes=None, bitfield_modifiers=None):
         self.token_type = token_type    # type: TokenTypes
         self.token_value = token_value  # type: str
+        self.original_line = ""         # type: str
         if child_nodes is None:
             self.child_nodes = []
         else:
@@ -24,6 +25,11 @@ class ASTNode:
             self.bitfield_modifiers = []                  # type: List[BitfieldModifier]
         else:
             self.bitfield_modifiers = bitfield_modifiers  # type: List[BitfieldModifier]
+        return
+
+    def set_original_line(self, line):
+        self.original_line = line
+        return
 
 
 class AsmParser:
@@ -90,6 +96,7 @@ class AsmParser:
         self.line_pos = 0
 
         instruction_node = self.parse_instruction()  # type: ASTNode
+        instruction_node.set_original_line(self.line)
 
         self.add_ast_node(instruction_node)
 
