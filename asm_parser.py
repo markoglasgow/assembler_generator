@@ -1,5 +1,5 @@
 
-from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes
+from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes, BitfieldModifier
 from parse_utils import ParseUtils
 from enum import Enum
 from typing import List
@@ -13,13 +13,17 @@ class TokenMatchType(Enum):
 
 class ASTNode:
 
-    def __init__(self, token_type=None, token_value=None, child_nodes=None):
+    def __init__(self, token_type=None, token_value=None, child_nodes=None, bitfield_modifiers=None):
         self.token_type = token_type    # type: TokenTypes
         self.token_value = token_value  # type: str
         if child_nodes is None:
             self.child_nodes = []
         else:
             self.child_nodes = child_nodes
+        if bitfield_modifiers is None:
+            self.bitfield_modifiers = []
+        else:
+            self.bitfield_modifiers = bitfield_modifiers
 
 
 class AsmParser:
@@ -111,11 +115,12 @@ class AsmParser:
 
         for defn_row in range(len(possible_patterns)):
             token_pattern = possible_patterns[defn_row].token_patterns
+            bitfield_modifiers = possible_patterns[defn_row].bitfield_modifiers
 
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
 
-            pattern_match, children = self.try_match_token_pattern(token_pattern)
+            pattern_match, children = self.try_match_token_pattern(token_pattern, bitfield_modifiers)
 
             if top_level and pattern_match:
                 # Check if the rest of the line is empty if we're trying to match the
@@ -131,7 +136,7 @@ class AsmParser:
 
         return False, []
 
-    def try_match_token_pattern(self, token_pattern):
+    def try_match_token_pattern(self, token_pattern, bitfield_modifiers: List[BitfieldModifier]):
 
         pattern_match = False
         child_nodes = []
@@ -149,7 +154,7 @@ class AsmParser:
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
             elif token_type == TokenTypes.RAW_TOKEN:
-                token_match, ast_node = self.try_match_raw_token(token_value)
+                token_match, ast_node = self.try_match_raw_token(token_value, bitfield_modifiers)
             elif token_type == TokenTypes.PLACEHOLDER:
                 token_match, placeholder_children = self.try_match_placeholder_token(token_value)
             else:
@@ -162,7 +167,7 @@ class AsmParser:
                 if ast_node is not None:
                     child_nodes.append(ast_node)
                 if placeholder_children is not None:
-                    placeholder_node = ASTNode(TokenTypes.PLACEHOLDER, token_value, placeholder_children)
+                    placeholder_node = ASTNode(TokenTypes.PLACEHOLDER, token_value, placeholder_children, bitfield_modifiers)
                     child_nodes.append(placeholder_node)
 
                 self.reset_token_buffer()
@@ -186,7 +191,7 @@ class AsmParser:
 
         return token_match
 
-    def try_match_raw_token(self, token_value):
+    def try_match_raw_token(self, token_value, bitfield_modifiers: List[BitfieldModifier]):
         token_match = False
         ast_node = ASTNode()
 
@@ -202,7 +207,7 @@ class AsmParser:
                 token_match = False
             elif match_type == TokenMatchType.EXACT_MATCH:
                 token_match = True
-                ast_node = ASTNode(TokenTypes.RAW_TOKEN, token_value)
+                ast_node = ASTNode(TokenTypes.RAW_TOKEN, token_value, None, bitfield_modifiers)
 
         return token_match, ast_node
 
