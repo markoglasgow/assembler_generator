@@ -352,13 +352,9 @@ class AsmGrammarSpec:
     def parse_modifier_string(self, modifier_string, line_num) -> BitfieldModifier:
 
         if modifier_string.startswith("emit"):
-            emit_arr = modifier_string.split()
-            if len(emit_arr) != 2:
-                print("ERROR: Unable to parse bitfield modifier '%s' on line %s" % (modifier_string, line_num+1))
-                raise ValueError
-            modifier_value = self.read_modifier_value(emit_arr[1])
+            modifier_value = self.read_modifier_value(modifier_string[4:])
             if modifier_value is None:
-                print("ERROR: Unable to parse bitfield modifier value '%s' on line %s" % (emit_arr[1], line_num + 1))
+                print("ERROR: Unable to parse bitfield emit value '%s' on line %s" % (modifier_string[4:], line_num + 1))
                 raise ValueError
             return BitfieldModifier(ModifierTypes.EMIT, None, modifier_value)
 
