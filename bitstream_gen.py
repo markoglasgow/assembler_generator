@@ -77,9 +77,9 @@ class BitstreamGenerator:
                                 c.consumed = True
                                 return b.modifier_value
 
-            child_emit = self.find_child_emit(emit_node_name, child_node.child_nodes)
-            if child_emit is not None:
-                return child_emit
+            # child_emit = self.find_child_emit(emit_node_name, child_node.child_nodes)
+            # if child_emit is not None:
+            #     return child_emit
 
         return None
 
