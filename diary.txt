@@ -69,3 +69,20 @@ July 19.
 
 Implemented printing for bitfield modifiers in the AST. 
 Consider using 'bitstring' package for bit manipulations. Can talk about decision to use 'bitstring' instead of 'BitArray' (one is pure Python, one is C)
+
+=======
+
+July 20. 
+
+Made first version of Bitfield Generator. Have to deal with ambiguity on this line:
+
+| %32_BIT_REG%, %32_BIT_REG%                    :: opcode_d=1 :: opcode_s=1 :: mod=11 :: reg=%32_BIT_REG% :: rm=%32_BIT_REG%    
+
+How to deal with ambiguous register reference? 
+
+Either make two different groups:
+
+32_BIT_REG_SRC
+32_BIT_REG_DEST
+
+... which leads to redundancy. Or, make an emit be 'consumed' when it is used, so it can only be consumed once. 

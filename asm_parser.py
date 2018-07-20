@@ -17,6 +17,7 @@ class ASTNode:
         self.token_type = token_type    # type: TokenTypes
         self.token_value = token_value  # type: str
         self.original_line = ""         # type: str
+        self.consumed = False
         if child_nodes is None:
             self.child_nodes = []
         else:

@@ -71,9 +71,11 @@ class BitstreamGenerator:
         for child_node in child_nodes:
             if child_node.token_value == emit_node_name:
                 for c in child_node.child_nodes:
-                    for b in c.bitfield_modifiers:
-                        if b.modifier_type == ModifierTypes.EMIT:
-                            return b.modifier_value
+                    if not c.consumed:
+                        for b in c.bitfield_modifiers:
+                            if b.modifier_type == ModifierTypes.EMIT:
+                                c.consumed = True
+                                return b.modifier_value
 
             child_emit = self.find_child_emit(emit_node_name, child_node.child_nodes)
             if child_emit is not None:

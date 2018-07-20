@@ -67,36 +67,36 @@ INSTRUCTION =
 ;
 
 MNEMONIC_2OPS =
-| mov                                       :: opcode=1000 10
-| xor                                       :: opcode=0011 00
+| mov                                           :: opcode=1000 10
+| xor                                           :: opcode=0011 00
 ;
 
 TWO_OPERANDS =
-| %8_BIT_REG%, %8_BIT_IMMEDIATE%
-| %8_BIT_REG%, %8_BIT_MEM_OP%
-| %8_BIT_REG%, %8_BIT_REG%
+| %8_BIT_REG%, %8_BIT_IMMEDIATE%                :: opcode_d=1 :: opcode_s=0
+| %8_BIT_REG%, %8_BIT_MEM_OP%                   :: opcode_d=1 :: opcode_s=0
+| %8_BIT_REG%, %8_BIT_REG%                      :: opcode_d=1 :: opcode_s=0 :: mod=11
 
-| %8_BIT_MEM_OP%, %8_BIT_REG%
-| %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%
+| %8_BIT_MEM_OP%, %8_BIT_REG%                   :: opcode_d=0 :: opcode_s=0
+| %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%             :: opcode_d=0 :: opcode_s=0
 
-| %16_BIT_REG%, %16_BIT_IMMEDIATE%
-| %16_BIT_REG%, %16_BIT_MEM_OP%
-| %16_BIT_REG%, %16_BIT_REG%
+| %16_BIT_REG%, %16_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
+| %16_BIT_REG%, %16_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
+| %16_BIT_REG%, %16_BIT_REG%                    :: opcode_d=1 :: opcode_s=1 :: mod=11            
 
-| %16_BIT_MEM_OP%, %16_BIT_REG%
-| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%
+| %16_BIT_MEM_OP%, %16_BIT_REG%                 :: opcode_d=0 :: opcode_s=1
+| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
 
-| %32_BIT_REG%, %32_BIT_IMMEDIATE%
-| %32_BIT_REG%, %32_BIT_MEM_OP%
-| %32_BIT_REG%, %32_BIT_REG%
+| %32_BIT_REG%, %32_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
+| %32_BIT_REG%, %32_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
+| %32_BIT_REG%, %32_BIT_REG%                    :: opcode_d=1 :: opcode_s=1 :: mod=11 :: reg=%32_BIT_REG% :: rm=%32_BIT_REG%                  
 
-| %32_BIT_MEM_OP%, %32_BIT_REG%
-| %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%
+| %32_BIT_MEM_OP%, %32_BIT_REG%                 :: opcode_d=0 :: opcode_s=1     
+| %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
 ;
 
 8_BIT_REG =
-| al
-| bl
+| al                                            :: emit 000
+| bl                                            :: emit 011
 ;
 
 POINTER = 
@@ -114,8 +114,8 @@ POINTER =
 ;
 
 16_BIT_REG =
-| ax
-| bx
+| ax                                            :: emit 000
+| bx                                            :: emit 011
 ;
 
 16_BIT_MEM_OP =
@@ -128,8 +128,8 @@ POINTER =
 ;
 
 32_BIT_REG =
-| eax
-| ebx
+| eax                                           :: emit 000
+| ebx                                           :: emit 011
 ;
 
 32_BIT_MEM_OP = 
