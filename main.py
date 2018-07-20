@@ -1,5 +1,6 @@
 from asm_grammar_spec import AsmGrammarSpec
 from asm_parser import AsmParser
+from bitstream_gen import BitstreamGenerator
 from ast_utils import pretty_print_ast
 
 INPUT_ASM_GRAMMAR_SPEC = "test_x86_spec.txt"
@@ -19,8 +20,12 @@ def main():
     print("Parsed ASM listing ok")
 
     print("\n\n")
-
     pretty_print_ast(asm_parser.ast)
+    print("\n\n")
+
+    bits_gen = BitstreamGenerator(asm_grammar, asm_parser.ast)
+    bits_gen.print_debug_bitstream()
+    print("\n\n")
 
 
 if __name__ == '__main__':
