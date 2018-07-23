@@ -105,13 +105,13 @@ class AsmParser:
     def parse_instruction(self) -> ASTNode:
 
         instruction_defn = self.get_insn_defn("INSTRUCTION")  # type: AsmInstructionDefinition
-        is_match, children = self.match_defn(instruction_defn, top_level=True)
+        is_match, children, bitfield_modifiers = self.match_defn(instruction_defn, top_level=True)
 
         if not is_match:
             print("Assembler ERROR: Unable to parse INSTRUCTION on line %s" % (self.line_num+1))
             raise ValueError
 
-        return ASTNode(TokenTypes.PLACEHOLDER, "INSTRUCTION", children)
+        return ASTNode(TokenTypes.PLACEHOLDER, "INSTRUCTION", children, bitfield_modifiers)
 
     def get_insn_defn(self, insn_defn_name: str):
         return self.spec.spec[insn_defn_name]
@@ -127,7 +127,7 @@ class AsmParser:
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
 
-            pattern_match, children = self.try_match_token_pattern(token_pattern, bitfield_modifiers)
+            pattern_match, children = self.try_match_token_pattern(token_pattern)
 
             if top_level and pattern_match:
                 # Check if the rest of the line is empty if we're trying to match the
@@ -135,15 +135,15 @@ class AsmParser:
                 pattern_match = self.is_rest_empty()
 
             if pattern_match:
-                return True, children
+                return True, children, bitfield_modifiers
             else:
                 self.line_pos = save_line_pos
                 self.token_buffer = save_token_buffer
                 continue
 
-        return False, []
+        return False, [], []
 
-    def try_match_token_pattern(self, token_pattern, bitfield_modifiers: List[BitfieldModifier]):
+    def try_match_token_pattern(self, token_pattern):
 
         pattern_match = False
         child_nodes = []
@@ -151,6 +151,9 @@ class AsmParser:
         for defn_col in range(len(token_pattern)):
             # noinspection PyUnusedLocal
             token_match = False
+            # noinspection PyUnusedLocal
+            bitfield_modifiers = []
+
             ast_node = None
             placeholder_children = None
             current_token = token_pattern[defn_col]
@@ -161,9 +164,9 @@ class AsmParser:
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
             elif token_type == TokenTypes.RAW_TOKEN:
-                token_match, ast_node = self.try_match_raw_token(token_value, bitfield_modifiers)
+                token_match, ast_node = self.try_match_raw_token(token_value)
             elif token_type == TokenTypes.PLACEHOLDER:
-                token_match, placeholder_children = self.try_match_placeholder_token(token_value)
+                token_match, placeholder_children, bitfield_modifiers = self.try_match_placeholder_token(token_value)
             else:
                 print("ERROR. Unimplemented token type?")
                 raise ValueError
@@ -198,7 +201,7 @@ class AsmParser:
 
         return token_match
 
-    def try_match_raw_token(self, token_value, bitfield_modifiers: List[BitfieldModifier]):
+    def try_match_raw_token(self, token_value):
         token_match = False
         ast_node = ASTNode()
 
@@ -214,7 +217,7 @@ class AsmParser:
                 token_match = False
             elif match_type == TokenMatchType.EXACT_MATCH:
                 token_match = True
-                ast_node = ASTNode(TokenTypes.RAW_TOKEN, token_value, None, bitfield_modifiers)
+                ast_node = ASTNode(TokenTypes.RAW_TOKEN, token_value, None)
 
         return token_match, ast_node
 
