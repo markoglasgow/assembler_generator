@@ -54,34 +54,11 @@ class BitstreamGenerator:
             if b.modifier_type == ModifierTypes.MODIFIER:
                 idx = self.get_bitfield_index(b.bitfield_name)
                 bitfields[idx].set_value(b.modifier_value)
-            elif b.modifier_type == ModifierTypes.PLACEHOLDER:
-                child_emit_value = self.find_child_emit(b.modifier_value, ast_node.child_nodes)
-                if child_emit_value is None:
-                    print("Bitstream Generation ERROR: Unable to find child emit '%s' for AST Node '%s'" % (b.modifier_value, ast_node.token_value))
-                    raise ValueError
-                idx = self.get_bitfield_index(b.bitfield_name)
-                bitfields[idx].set_value(child_emit_value)
 
         for child_node in ast_node.child_nodes:
             bitfields = self.set_bitfields(bitfields, child_node)
 
         return bitfields
-
-    def find_child_emit(self, emit_node_name, child_nodes: List[ASTNode]):
-        for child_node in child_nodes:
-            if child_node.token_value == emit_node_name:
-                for c in child_node.child_nodes:
-                    if not c.consumed:
-                        for b in c.bitfield_modifiers:
-                            if b.modifier_type == ModifierTypes.EMIT:
-                                c.consumed = True
-                                return b.modifier_value
-
-            # child_emit = self.find_child_emit(emit_node_name, child_node.child_nodes)
-            # if child_emit is not None:
-            #     return child_emit
-
-        return None
 
     def get_bitfield_index(self, bitfield_name):
         if bitfield_name not in self.spec.bitfield_indexes_map:

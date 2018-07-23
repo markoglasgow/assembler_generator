@@ -20,8 +20,6 @@ class TokenTypes(Enum):
 
 class ModifierTypes(Enum):
     MODIFIER = 1
-    PLACEHOLDER = 2
-    EMIT = 3
 
 
 class BitfieldModifier:
@@ -351,14 +349,7 @@ class AsmGrammarSpec:
 
     def parse_modifier_string(self, modifier_string, line_num) -> BitfieldModifier:
 
-        if modifier_string.startswith("emit"):
-            modifier_value = self.read_modifier_value(modifier_string[4:])
-            if modifier_value is None:
-                print("ERROR: Unable to parse bitfield emit value '%s' on line %s" % (modifier_string[4:], line_num + 1))
-                raise ValueError
-            return BitfieldModifier(ModifierTypes.EMIT, None, modifier_value)
-
-        elif "=" in modifier_string:
+        if "=" in modifier_string:
             modifier_arr = modifier_string.split("=")
 
             if len(modifier_arr) != 2:
@@ -370,12 +361,7 @@ class AsmGrammarSpec:
                 print("ERROR: Trying to assign to unknown bitfield '%s' in bitfield modifier on line '%s" % (bitfield_name, line_num+1))
                 raise ValueError
 
-            bitfield_value = modifier_arr[1]
-            if bitfield_value.startswith("%") and bitfield_value.endswith("%"):
-                bitfield_value = bitfield_value.replace("%", "")
-                return BitfieldModifier(ModifierTypes.PLACEHOLDER, bitfield_name, bitfield_value)
-
-            bitfield_value = self.read_modifier_value(bitfield_value)
+            bitfield_value = self.read_modifier_value(modifier_arr[1])
             if bitfield_value is None:
                 print("ERROR: Unable to parse bitfield modifier value '%s' on line %s" % (modifier_arr[1], line_num + 1))
                 raise ValueError
@@ -391,7 +377,6 @@ class AsmGrammarSpec:
         return value_string
 
     # TODO: Detect recursion in spec.
-    # TODO: Detect is bitfield modifier placeholder depends on an unidentified pattern.
     def validate_spec(self):
 
         if "INSTRUCTION" not in self.spec:

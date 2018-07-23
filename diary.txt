@@ -86,3 +86,32 @@ Either make two different groups:
 32_BIT_REG_DEST
 
 ... which leads to redundancy. Or, make an emit be 'consumed' when it is used, so it can only be consumed once. 
+
+
+=======
+
+July 23 meeting notes
+
+Email introduction to prof.
+
+Introduction
+Background / related work
+requirements
+Design and implementation
+Evaluation
+Conclusion
+
+
+For Evaluation
+
+- Good if you can refer back to strategic goals.
+- Give evidence if you're met strategic goals.
+- Plugin system should be designed. Highlight this in report. But it gives you real flexibility.
+- User is pretty sophisticated. Error system doesn't have to be too advanced, because of sophisticated user.
+
+-TODO:
+
+- bitstream generation, get rid of emits
+- plugin system (ints, relative addresses)
+- labels
+- 

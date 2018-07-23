@@ -74,33 +74,38 @@ MNEMONIC_2OPS =
 TWO_OPERANDS =
 | %8_BIT_REG%, %8_BIT_IMMEDIATE%                :: opcode_d=1 :: opcode_s=0
 | %8_BIT_REG%, %8_BIT_MEM_OP%                   :: opcode_d=1 :: opcode_s=0
-| %8_BIT_REG%, %8_BIT_REG%                      :: opcode_d=1 :: opcode_s=0 :: mod=11
+| %8_BIT_REG%, %8_BIT_REG_RM%                   :: opcode_d=1 :: opcode_s=0 :: mod=11
 
 | %8_BIT_MEM_OP%, %8_BIT_REG%                   :: opcode_d=0 :: opcode_s=0
 | %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%             :: opcode_d=0 :: opcode_s=0
 
 | %16_BIT_REG%, %16_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
 | %16_BIT_REG%, %16_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
-| %16_BIT_REG%, %16_BIT_REG%                    :: opcode_d=1 :: opcode_s=1 :: mod=11            
+| %16_BIT_REG%, %16_BIT_REG_RM%                 :: opcode_d=1 :: opcode_s=1 :: mod=11            
 
 | %16_BIT_MEM_OP%, %16_BIT_REG%                 :: opcode_d=0 :: opcode_s=1
 | %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
 
 | %32_BIT_REG%, %32_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
-| %32_BIT_REG%, %32_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1 :: reg=%32_BIT_REG%
-| %32_BIT_REG%, %32_BIT_REG%                    :: opcode_d=1 :: opcode_s=1 :: mod=11 :: reg=%32_BIT_REG% :: rm=%32_BIT_REG%                  
+| %32_BIT_REG%, %32_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
+| %32_BIT_REG%, %32_BIT_REG_RM%                 :: opcode_d=1 :: opcode_s=1 :: mod=11                 
 
-| %32_BIT_MEM_OP%, %32_BIT_REG%                 :: opcode_d=0 :: opcode_s=1 :: reg=%32_BIT_REG%   
+| %32_BIT_MEM_OP%, %32_BIT_REG%                 :: opcode_d=0 :: opcode_s=1  
 | %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
 ;
 
 8_BIT_REG =
-| al                                            :: emit 000
-| bl                                            :: emit 011
+| al                                            :: reg=000
+| bl                                            :: reg=011
+;
+
+8_BIT_REG_RM =
+| al                                            :: rm=000
+| bl                                            :: rm=011
 ;
 
 POINTER = 
-| ptr[%32_BIT_REG%]                             :: mod=00 :: rm=%32_BIT_REG%
+| ptr[%32_BIT_REG_RM%]                          :: mod=00
 | ptr[%32_BIT_IMMEDIATE%]
 ;
 
@@ -114,8 +119,13 @@ POINTER =
 ;
 
 16_BIT_REG =
-| ax                                            :: emit 000
-| bx                                            :: emit 011
+| ax                                            :: reg=000
+| bx                                            :: reg=011
+;
+
+16_BIT_REG_RM =
+| ax                                            :: rm=000
+| bx                                            :: rm=011
 ;
 
 16_BIT_MEM_OP =
@@ -128,8 +138,13 @@ POINTER =
 ;
 
 32_BIT_REG =
-| eax                                           :: emit 000
-| ebx                                           :: emit 011
+| eax                                           :: reg=000
+| ebx                                           :: reg=011
+;
+
+32_BIT_REG_RM =
+| eax                                           :: rm=000
+| ebx                                           :: rm=011
 ;
 
 32_BIT_MEM_OP = 

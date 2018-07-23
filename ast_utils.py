@@ -77,12 +77,8 @@ def print_bitfield_modifiers(ast_node: ASTNode):
 
     for b in ast_node.bitfield_modifiers:
         ret_val += ":: "
-        if b.modifier_type == ModifierTypes.EMIT:
-            ret_val += "emit " + b.modifier_value
-        elif b.modifier_type == ModifierTypes.MODIFIER:
+        if b.modifier_type == ModifierTypes.MODIFIER:
             ret_val += b.bitfield_name + "=" + b.modifier_value
-        elif b.modifier_type == ModifierTypes.PLACEHOLDER:
-            ret_val += b.bitfield_name + "=%" + b.modifier_value + "%"
 
         ret_val += " "
 
