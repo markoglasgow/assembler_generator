@@ -1,6 +1,7 @@
 from asm_grammar_spec import AsmGrammarSpec, ModifierTypes, BitfieldModifier, BitfieldDefinition
 from asm_parser import ASTNode
 from typing import List
+from tabulate import tabulate
 
 
 class Bitfield:
@@ -28,7 +29,8 @@ class BitstreamGenerator:
         for ast_node in self.ast:
             if len(ast_node.original_line) > 0:
                 print(ast_node.original_line)
-            print(self.get_node_debug_bitstream(ast_node))
+            headers, values = self.get_node_debug_bitstream(ast_node)
+            print(tabulate(values, headers=headers))
             print("")
 
         return
@@ -68,11 +70,13 @@ class BitstreamGenerator:
         return self.spec.bitfield_indexes_map[bitfield_name]
 
     def get_debug_str_lines(self, bitfields: List[Bitfield]):
-        headers = ""
-        values = ""
+        headers = []
+        values = []
+        value_row = []
         for b in bitfields:
             if b.present:
-                headers += b.name + "\t"
-                values += b.value + "\t"
+                headers.append(b.name)
+                value_row.append(b.value)
+        values.append(value_row)
 
-        return headers + "\n" + values
+        return headers, values
