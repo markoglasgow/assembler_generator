@@ -114,4 +114,11 @@ For Evaluation
 - bitstream generation, get rid of emits
 - plugin system (ints, relative addresses)
 - labels
-- 
+
+=======
+
+July 23 work
+
+- Got rid of placeholders/emit in bitfield modifiers
+- Got first printing of x86 bitstream working
+- Started working on ARM bitstream
