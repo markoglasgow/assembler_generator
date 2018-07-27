@@ -29,18 +29,21 @@ class BitstreamGenerator:
         for ast_node in self.ast:
             if len(ast_node.original_line) > 0:
                 print(ast_node.original_line)
-            headers, values = self.get_node_debug_bitstream(ast_node)
+
+            bitfields = self.get_node_bitfields(ast_node)
+
+            headers, values = self.get_debug_str_lines(bitfields)
             print(tabulate(values, headers=headers))
             print("")
 
         return
 
-    def get_node_debug_bitstream(self, ast_node):
+    def get_node_bitfields(self, ast_node):
 
         bitfields = self.get_possible_bitfields()
         bitfields = self.set_bitfields(bitfields, ast_node)
 
-        return self.get_debug_str_lines(bitfields)
+        return bitfields
 
     def get_possible_bitfields(self) -> List[Bitfield]:
 
