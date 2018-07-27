@@ -3,11 +3,11 @@ from asm_parser import AsmParser
 from bitstream_gen import BitstreamGenerator
 from ast_utils import pretty_print_ast
 
-INPUT_ASM_GRAMMAR_SPEC = "test_x86_spec.txt"
-INPUT_ASM_LISTING = "test_x86_listing.txt"
+INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
+INPUT_ASM_LISTING = "test/test_x86_listing.txt"
 
-# INPUT_ASM_GRAMMAR_SPEC = "test_ARM_spec.txt"
-# INPUT_ASM_LISTING = "test_ARM_listing.txt"
+# INPUT_ASM_GRAMMAR_SPEC = "test/test_ARM_spec.txt"
+# INPUT_ASM_LISTING = "test/test_ARM_listing.txt"
 
 
 def main():
