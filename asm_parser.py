@@ -1,4 +1,4 @@
-
+from asm_int_types import AsmIntTypes
 from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes, BitfieldModifier
 from parse_utils import ParseUtils
 from enum import Enum
@@ -68,10 +68,13 @@ class AsmParser:
 
         return
 
-    def read_line_char(self, to_lower=True):
+    def read_line_char(self, to_lower=True, valid_chars=None):
         next_char = ParseUtils.read_next_char(self.line, self.line_pos)
         if next_char is None:
             return False
+        if valid_chars is not None:
+            if next_char not in valid_chars:
+                return False
         if to_lower:
             next_char = next_char.lower()
         self.token_buffer += next_char
@@ -163,6 +166,8 @@ class AsmParser:
 
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
+            elif token_type == TokenTypes.INT_TOKEN:
+                token_match, ast_node = self.try_match_int_token(token_value)
             elif token_type == TokenTypes.RAW_TOKEN:
                 token_match, ast_node = self.try_match_raw_token(token_value)
             elif token_type == TokenTypes.PLACEHOLDER:
@@ -200,6 +205,22 @@ class AsmParser:
                 token_match = False
 
         return token_match
+
+    def try_match_int_token(self, token_value):
+        token_match = False
+        ast_node = ASTNode()
+
+        valid_chars = AsmIntTypes.get_valid_chars(token_value)
+
+        if self.read_line_char(to_lower=False, valid_chars=valid_chars) is not False:
+            while self.read_line_char(to_lower=False, valid_chars=valid_chars):
+                token_match = False
+
+            if AsmIntTypes.validate_integer(token_value, self.token_buffer):
+                ast_node = ASTNode(TokenTypes.INT_TOKEN, token_value + " " + self.token_buffer, None)
+                token_match = True
+
+        return token_match, ast_node
 
     def try_match_raw_token(self, token_value):
         token_match = False

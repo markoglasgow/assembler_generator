@@ -1,4 +1,4 @@
-
+from asm_int_types import AsmIntTypes
 from parse_utils import ParseUtils
 from enum import Enum
 from typing import Dict, List, Optional
@@ -16,6 +16,7 @@ class TokenTypes(Enum):
     WHITESPACE = 1
     RAW_TOKEN = 2
     PLACEHOLDER = 3
+    INT_TOKEN = 4
 
 
 class ModifierTypes(Enum):
@@ -329,7 +330,13 @@ class AsmGrammarSpec:
 
                 else:
                     next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '%'])
-                    pattern_tokens.append((TokenTypes.RAW_TOKEN, next_token))
+                    if next_token.startswith("int_"):
+                        if not AsmIntTypes.is_defined_type(next_token):
+                            print("ERROR: int of type '%s' is not defined in any plugin. Line: %s" % (next_token, line_num+1))
+                            raise ValueError
+                        pattern_tokens.append((TokenTypes.INT_TOKEN, next_token))
+                    else:
+                        pattern_tokens.append((TokenTypes.RAW_TOKEN, next_token))
 
         else:
             print("ERROR: Expected ';' or '|' on line %s, got '%s' instead" % ((line_num+1), first_token))

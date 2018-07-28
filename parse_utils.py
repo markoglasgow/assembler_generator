@@ -1,5 +1,6 @@
 from typing import Tuple
 
+
 class ParseUtils:
 
     valid_identifier_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_"
