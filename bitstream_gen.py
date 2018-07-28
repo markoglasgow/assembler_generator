@@ -1,7 +1,10 @@
 from asm_grammar_spec import AsmGrammarSpec, ModifierTypes, BitfieldModifier, BitfieldDefinition
 from asm_parser import ASTNode
+
 from typing import List
+
 from tabulate import tabulate
+from bitstring import BitArray
 
 
 class Bitfield:
@@ -24,6 +27,16 @@ class BitstreamGenerator:
         self.ast = ast
         return
 
+    def get_bytes(self):
+
+        bitstream = BitArray()
+        for ast_node in self.ast:
+            node_bitfields = self.get_node_bitfields(ast_node)
+            node_bitarray = self.bitfields_to_bitarray(node_bitfields)
+            bitstream.append(node_bitarray)
+
+        return bitstream.tobytes()
+
     def print_debug_bitstream(self):
 
         for ast_node in self.ast:
@@ -34,6 +47,12 @@ class BitstreamGenerator:
 
             headers, values = self.get_debug_str_lines(bitfields)
             print(tabulate(values, headers=headers))
+
+            bitarray = self.bitfields_to_bitarray(bitfields)
+            bytes_padded = str(bitarray.tobytes()).replace("'\\x", "").replace("'", "").replace("\\", "").replace("b", "").replace("x", " ")
+            print("Bytes (padded): ")
+            print(bytes_padded)
+
             print("")
 
         return
@@ -83,3 +102,12 @@ class BitstreamGenerator:
         values.append(value_row)
 
         return headers, values
+
+    def bitfields_to_bitarray(self, bitfields: List[Bitfield]) -> BitArray:
+
+        retval = BitArray()
+        for b in bitfields:
+            if b.present:
+                retval.append('0b' + b.value)
+
+        return retval

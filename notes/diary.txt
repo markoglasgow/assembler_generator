@@ -122,3 +122,14 @@ July 23 work
 - Got rid of placeholders/emit in bitfield modifiers
 - Got first printing of x86 bitstream working
 - Started working on ARM bitstream
+
+=======
+
+July 27 work
+
+Messing around with pip, installed 'tabulate' dependency to better format debug output.
+
+Next up:
+- Install BitArray and emit actual bitstream
+- Use Capstone to disassemble bitstream, test it against expected assembly
+- Use captstone in printing debug stream to disassemble it instruction by instruction

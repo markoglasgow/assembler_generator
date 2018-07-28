@@ -27,6 +27,9 @@ def main():
     bits_gen.print_debug_bitstream()
     print("\n\n")
 
+    raw_bytes = bits_gen.get_bytes()
+
+
 
 if __name__ == '__main__':
     main()

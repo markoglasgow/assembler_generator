@@ -157,22 +157,4 @@ POINTER =
 ;
 
 ////////////////////////////////////////
-// TODO x86:
-// optional whitespaces?
-// doesn't handle optional whitespace after commas ',' correctly
-// support tabs \t and whitespaces
-// constraints on integer immediates. Parsing integer immediates.
-// Plugin system for parsing integer immediates, and emitting their bitcode.
 
-// build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
-
-// need to make pointer expressions more complex
-// labels, directives?
-// handle case sensitive stuff?
-// string literals? 
-// 
-// detect recursive definitions in the grammar
-//
-// burroughs 5500 
-// BitArray: 
-// https://pythonhosted.org/bitstring/index.html
