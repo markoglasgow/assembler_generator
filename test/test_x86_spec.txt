@@ -114,8 +114,7 @@ POINTER =
 ;
 
 8_BIT_IMMEDIATE = 
-| int_unsigned_8_bits
-| int_signed_8_bits
+| int_8_bits
 ;
 
 16_BIT_REG =
@@ -133,8 +132,7 @@ POINTER =
 ;
 
 16_BIT_IMMEDIATE =
-| int_unsigned_16_bits
-| int_signed_16_bits
+| int_16_bits
 ;
 
 32_BIT_REG =
@@ -152,8 +150,7 @@ POINTER =
 ;
 
 32_BIT_IMMEDIATE = 
-| int_unsigned_32_bits
-| int_signed_32_bits
+| int_32_bits
 ;
 
 ////////////////////////////////////////
