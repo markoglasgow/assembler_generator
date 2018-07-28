@@ -1,0 +1,4 @@
+0x1000:	mov	al, byte ptr [eax]
+0x1002:	xor	eax, ebx
+0x1004:	mov	word ptr [ebx], ax
+

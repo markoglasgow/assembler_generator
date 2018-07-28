@@ -79,12 +79,12 @@ TWO_OPERANDS =
 | %8_BIT_MEM_OP%, %8_BIT_REG%                   :: opcode_d=0 :: opcode_s=0
 | %8_BIT_MEM_OP%, %8_BIT_IMMEDIATE%             :: opcode_d=0 :: opcode_s=0
 
-| %16_BIT_REG%, %16_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
-| %16_BIT_REG%, %16_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
-| %16_BIT_REG%, %16_BIT_REG_RM%                 :: opcode_d=1 :: opcode_s=1 :: mod=11            
+| %16_BIT_REG%, %16_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1 :: prefix = 0110 0110
+| %16_BIT_REG%, %16_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1 :: prefix = 0110 0110
+| %16_BIT_REG%, %16_BIT_REG_RM%                 :: opcode_d=1 :: opcode_s=1 :: mod=11 :: prefix = 0110 0110            
 
-| %16_BIT_MEM_OP%, %16_BIT_REG%                 :: opcode_d=0 :: opcode_s=1
-| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
+| %16_BIT_MEM_OP%, %16_BIT_REG%                 :: opcode_d=0 :: opcode_s=1 :: prefix = 0110 0110
+| %16_BIT_MEM_OP%, %16_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1 :: prefix = 0110 0110
 
 | %32_BIT_REG%, %32_BIT_IMMEDIATE%              :: opcode_d=1 :: opcode_s=1
 | %32_BIT_REG%, %32_BIT_MEM_OP%                 :: opcode_d=1 :: opcode_s=1
@@ -157,4 +157,3 @@ POINTER =
 ;
 
 ////////////////////////////////////////
-

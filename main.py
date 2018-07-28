@@ -3,11 +3,37 @@ from asm_parser import AsmParser
 from bitstream_gen import BitstreamGenerator
 from ast_utils import pretty_print_ast
 
-INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
-INPUT_ASM_LISTING = "test/test_x86_listing.txt"
+from capstone import *
 
-# INPUT_ASM_GRAMMAR_SPEC = "test/test_ARM_spec.txt"
-# INPUT_ASM_LISTING = "test/test_ARM_listing.txt"
+TEST_NAME = "test_x86"
+DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
+
+# TEST_NAME = "test_ARM"
+# DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+
+INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
+INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
+INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
+
+
+def check_disassembly(raw_bytes):
+    disassembly_str = ""
+    for (address, size, mnemonic, op_str) in DISASSEMBLER.disasm_lite(raw_bytes, 0x1000):
+        disassembly_str += "0x%x:\t%s\t%s\n" % (address, mnemonic, op_str)
+
+    disassembly_str += "\n"
+
+    with open(INPUT_EXPECTED_DISASM_LISTING, "r") as text_file:
+        expected_disassembly = text_file.read()
+
+    if disassembly_str != expected_disassembly:
+        print("ERROR: Expected disassembly in '%s' does not match given disassembly: " % INPUT_EXPECTED_DISASM_LISTING)
+        print(disassembly_str)
+        raise ValueError
+
+    print(disassembly_str)
+
+    return
 
 
 def main():
@@ -29,6 +55,7 @@ def main():
 
     raw_bytes = bits_gen.get_bytes()
 
+    check_disassembly(raw_bytes)
 
 
 if __name__ == '__main__':
