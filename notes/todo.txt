@@ -1,14 +1,11 @@
-- Install BitString and emit actual bitstream
-- Use Capstone to disassemble bitstream, test it against expected assembly
-- Use captstone in printing debug stream to disassemble it instruction by instruction
-
-- optional whitespaces?
-- doesn't handle optional whitespace after commas ',' correctly
-- support tabs \t and whitespaces
 - constraints on integer immediates. Parsing integer immediates.
 - Plugin system for parsing integer immediates, and emitting their bitcode.
 
 - build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
+
+- optional whitespaces?
+- doesn't handle optional whitespace after commas ',' correctly
+- support tabs \t and whitespaces
 
 - need to make pointer expressions more complex
 - labels, directives?
@@ -20,3 +17,9 @@
 - burroughs 5500 
 - BitArray: 
 - https://pythonhosted.org/bitstring/index.html
+
+
+====================
+
+[x] Install BitString and emit actual bitstream
+[x] Use Capstone to disassemble bitstream, test it against expected assembly

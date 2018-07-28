@@ -127,9 +127,13 @@ July 23 work
 
 July 27 work
 
-Messing around with pip, installed 'tabulate' dependency to better format debug output.
+- Messing around with pip, installed 'tabulate' dependency to better format debug output.
 
-Next up:
-- Install BitArray and emit actual bitstream
-- Use Capstone to disassemble bitstream, test it against expected assembly
-- Use captstone in printing debug stream to disassemble it instruction by instruction
+=======
+
+July 28 work
+
+- Installed BitString and emitted actual bytes
+- Use Capstone to disassemble bytes, test it against expected assembly
+
+
