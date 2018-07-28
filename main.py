@@ -2,6 +2,7 @@ from asm_grammar_spec import AsmGrammarSpec
 from asm_parser import AsmParser
 from bitstream_gen import BitstreamGenerator
 from ast_utils import pretty_print_ast
+from asm_int_types import AsmIntTypes
 
 from capstone import *
 
@@ -37,6 +38,9 @@ def check_disassembly(raw_bytes):
 
 
 def main():
+
+    AsmIntTypes.load_plugins()
+
     asm_grammar = AsmGrammarSpec()
     asm_grammar.read_spec(INPUT_ASM_GRAMMAR_SPEC)
     print("Read ASM grammar spec ok")

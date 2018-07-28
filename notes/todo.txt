@@ -1,5 +1,6 @@
 - constraints on integer immediates. Parsing integer immediates.
 - Plugin system for parsing integer immediates, and emitting their bitcode.
+- make all bitfield values used BitArray instead of strings
 
 - build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
 

@@ -1,0 +1,9 @@
+[Core]
+Name = Builtin Types
+Module = builtin_types
+
+[Documentation]
+Author = Marko Caklovic
+Version = 1.0
+Website = https://github.com/markoglasgow
+Description = Builtin types parser and emitter for the Generic Assembler Generator
