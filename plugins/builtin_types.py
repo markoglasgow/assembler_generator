@@ -1,5 +1,5 @@
 from yapsy.IPlugin import IPlugin
-from bitstring import Bits
+from bitstring import BitArray
 
 from typing import Optional
 
@@ -83,15 +83,18 @@ class PluginOne(IPlugin):
 
     def emit_int_32_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = Bits(int=parsed_int, length=32)
+        b = BitArray(int=parsed_int, length=32)
+        b.byteswap()
         return b.bin
 
     def emit_int_16_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = Bits(int=parsed_int, length=16)
+        b = BitArray(int=parsed_int, length=16)
+        b.byteswap()
         return b.bin
 
     def emit_int_8_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = Bits(int=parsed_int, length=8)
+        b = BitArray(int=parsed_int, length=8)
+        b.byteswap()
         return b.bin

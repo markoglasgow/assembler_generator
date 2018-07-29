@@ -1,4 +1,6 @@
-;mov al, byte ptr[eax]
-;xor eax, ebx
-;mov word ptr[ebx], ax
+mov al, byte ptr[eax]
+xor eax, ebx
+mov word ptr[ebx], ax
 mov eax, 1
+mov bx, 01337h
+mov al, -1
