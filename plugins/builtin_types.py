@@ -1,4 +1,7 @@
 from yapsy.IPlugin import IPlugin
+from typing import Optional
+
+from parse_utils import ParseUtils
 
 
 class PluginOne(IPlugin):
@@ -32,10 +35,49 @@ class PluginOne(IPlugin):
         return self.valid_chars_map
 
     def verify_int_32_bits(self, int_string):
-        return False
+        parsed_int = self.parse_int(int_string)
+        if parsed_int is None:
+            return False
+        elif -2147483648 <= parsed_int <= 2147483647:
+            return True
+        else:
+            return False
 
     def verify_int_16_bits(self, int_string):
-        return False
+        parsed_int = self.parse_int(int_string)
+        if parsed_int is None:
+            return False
+        elif -32768 <= parsed_int <= 32767:
+            return True
+        else:
+            return False
 
     def verify_int_8_bits(self, int_string):
-        return False
+        parsed_int = self.parse_int(int_string)
+        if parsed_int is None:
+            return False
+        elif -128 <= parsed_int <= 127:
+            return True
+        else:
+            return False
+
+    def parse_int(self, int_string: str) -> Optional[int]:
+        if int_string.startswith("-") and int_string.endswith("h"):
+            return None
+
+        if not int_string.startswith("0") and int_string.endswith("h"):
+            return None
+
+        if int_string.startswith("0") and int_string.endswith("h"):
+            stripped_string = int_string[1:]
+            stripped_string = stripped_string[:-1]
+            try:
+                return int(stripped_string, 16)
+            except ValueError:
+                return None
+
+        else:
+            try:
+                return int(int_string, 10)
+            except ValueError:
+                return None
