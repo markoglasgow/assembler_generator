@@ -36,7 +36,7 @@ def pretty_print_ast_node(ast_node: ASTNode, indentation: int):
     if ast_node.token_type == TokenTypes.WHITESPACE:
         return
 
-    elif ast_node.token_type == TokenTypes.RAW_TOKEN:
+    elif ast_node.token_type == TokenTypes.RAW_TOKEN or ast_node.token_type == TokenTypes.INT_TOKEN:
         row_str = indent_by(indentation) + "'" + ast_node.token_value + "'"
         row_str += padding(len(row_str))
         row_str += print_bitfield_modifiers(ast_node)
@@ -79,6 +79,8 @@ def print_bitfield_modifiers(ast_node: ASTNode):
         ret_val += ":: "
         if b.modifier_type == ModifierTypes.MODIFIER:
             ret_val += b.bitfield_name + "=" + b.modifier_value
+        elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER:
+            ret_val += b.bitfield_name + "=%" + b.modifier_value + "%"
 
         ret_val += " "
 

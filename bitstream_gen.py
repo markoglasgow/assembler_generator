@@ -12,7 +12,7 @@ class Bitfield:
     def __init__(self, name, size):
         self.name = name
         self.size = size
-        self.value = ""
+        self.value = None
         self.present = False
 
     def set_value(self, value):

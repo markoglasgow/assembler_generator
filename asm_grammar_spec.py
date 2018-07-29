@@ -21,6 +21,7 @@ class TokenTypes(Enum):
 
 class ModifierTypes(Enum):
     MODIFIER = 1
+    INT_PLACEHOLDER = 2
 
 
 class BitfieldModifier:
@@ -368,6 +369,13 @@ class AsmGrammarSpec:
                 print("ERROR: Trying to assign to unknown bitfield '%s' in bitfield modifier on line '%s" % (bitfield_name, line_num+1))
                 raise ValueError
 
+            if modifier_arr[1].startswith("%") and modifier_arr[1].endswith("%"):
+                int_placeholder_name = modifier_arr[1][1:-1]
+                if not AsmIntTypes.is_defined_type(int_placeholder_name):
+                    print("ERROR: Unknown bitfield modifier int placeholder '%s' on line %s. Please make sure that this int type is defined in a plugin." % (modifier_arr[1], line_num + 1))
+                    raise ValueError
+                return BitfieldModifier(ModifierTypes.INT_PLACEHOLDER, bitfield_name, int_placeholder_name)
+
             bitfield_value = self.read_modifier_value(modifier_arr[1])
             if bitfield_value is None:
                 print("ERROR: Unable to parse bitfield modifier value '%s' on line %s" % (modifier_arr[1], line_num + 1))
@@ -380,7 +388,12 @@ class AsmGrammarSpec:
             raise ValueError
 
     def read_modifier_value(self, value_string):
-        # TODO: Implement function only allowing 1's and 0'
+        # TODO: Maybe store these values as BitArray instead of a string of 1's and 0's?
+        for c in value_string:
+            if c == '0' or c == '1':
+                continue
+            else:
+                return None
         return value_string
 
     # TODO: Detect recursion in spec.

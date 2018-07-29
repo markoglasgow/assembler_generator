@@ -114,7 +114,7 @@ POINTER =
 ;
 
 8_BIT_IMMEDIATE = 
-| int_8_bits
+| int_8_bits                                    :: immediate_8=%int_8_bits%
 ;
 
 16_BIT_REG =
@@ -132,7 +132,7 @@ POINTER =
 ;
 
 16_BIT_IMMEDIATE =
-| int_16_bits
+| int_16_bits                                   :: immediate_16=%int_16_bits%
 ;
 
 32_BIT_REG =
@@ -150,7 +150,7 @@ POINTER =
 ;
 
 32_BIT_IMMEDIATE = 
-| int_32_bits
+| int_32_bits                                   :: immediate_32=%int_32_bits%
 ;
 
 ////////////////////////////////////////

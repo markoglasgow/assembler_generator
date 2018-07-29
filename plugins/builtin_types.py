@@ -69,8 +69,7 @@ class PluginOne(IPlugin):
             return None
 
         if int_string.startswith("0") and int_string.endswith("h"):
-            stripped_string = int_string[1:]
-            stripped_string = stripped_string[:-1]
+            stripped_string = int_string[1:-1]
             try:
                 return int(stripped_string, 16)
             except ValueError:
