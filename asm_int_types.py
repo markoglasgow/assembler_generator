@@ -40,6 +40,14 @@ class AsmIntTypes:
                     raise ValueError
                 AsmIntTypes.verify_methods[p] = verify_method
 
+                emit_method_name = "emit_" + p
+                emit_method = getattr(plugin.plugin_object, emit_method_name, None)
+                if emit_method is None:
+                    print("Plugin Error: Method '%s' is missing from plugin file '%s' for type '%s'" % (
+                        emit_method_name, plugin.path, p))
+                    raise ValueError
+                AsmIntTypes.emit_methods[p] = emit_method
+
                 AsmIntTypes.int_types[p] = True
 
         return
@@ -61,3 +69,8 @@ class AsmIntTypes:
     def validate_integer(int_type, int_string):
         verify_method = AsmIntTypes.verify_methods[int_type]
         return verify_method(int_string)
+
+    @staticmethod
+    def emit_bits(int_type, int_string):
+        emit_method = AsmIntTypes.emit_methods[int_type]
+        return emit_method(int_string)

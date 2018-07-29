@@ -1,7 +1,7 @@
 from yapsy.IPlugin import IPlugin
-from typing import Optional
+from bitstring import Bits
 
-from parse_utils import ParseUtils
+from typing import Optional
 
 
 class PluginOne(IPlugin):
@@ -80,3 +80,18 @@ class PluginOne(IPlugin):
                 return int(int_string, 10)
             except ValueError:
                 return None
+
+    def emit_int_32_bits(self, int_string):
+        parsed_int = self.parse_int(int_string)
+        b = Bits(int=parsed_int, length=32)
+        return b.bin
+
+    def emit_int_16_bits(self, int_string):
+        parsed_int = self.parse_int(int_string)
+        b = Bits(int=parsed_int, length=16)
+        return b.bin
+
+    def emit_int_8_bits(self, int_string):
+        parsed_int = self.parse_int(int_string)
+        b = Bits(int=parsed_int, length=8)
+        return b.bin

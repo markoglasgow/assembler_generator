@@ -1,5 +1,5 @@
 from asm_int_types import AsmIntTypes
-from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes, BitfieldModifier
+from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes, BitfieldModifier, ModifierTypes
 from parse_utils import ParseUtils
 from enum import Enum
 from typing import List
@@ -138,6 +138,7 @@ class AsmParser:
                 pattern_match = self.is_rest_empty()
 
             if pattern_match:
+                bitfield_modifiers = self.process_int_placeholders(bitfield_modifiers, children)
                 return True, children, bitfield_modifiers
             else:
                 self.line_pos = save_line_pos
@@ -270,4 +271,52 @@ class AsmParser:
             else:
                 return False
 
+        return True
+
+    def process_int_placeholders(self, bitfield_modifiers: List[BitfieldModifier], children: List[ASTNode]) -> List[BitfieldModifier]:
+        processed_bitfields = []
+        for b in bitfield_modifiers:
+
+            if b.modifier_type == ModifierTypes.MODIFIER:
+                processed_bitfields.append(b)
+
+            elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER:
+                found_child = False
+                int_placeholder_name = b.modifier_value
+                for ast_node in children:
+                    if ast_node.token_type == TokenTypes.INT_TOKEN and ast_node.token_value.startswith(int_placeholder_name + " "):
+                        found_child = True
+                        raw_int_string = ast_node.token_value[len(int_placeholder_name + " "):]
+                        int_bit_string = AsmIntTypes.emit_bits(int_placeholder_name, raw_int_string)
+
+                        if not self.is_valid_bitstring(int_bit_string):
+                            print("ERROR: Emit of a '%s' with value '%s' returned bitstring '%s', which is invalid. Bitstrings may only contain 1 and 0 characters." % (int_placeholder_name, raw_int_string, int_bit_string))
+                            raise ValueError
+
+                        bitfield_defn_index = self.spec.bitfield_indexes_map[b.bitfield_name]
+                        bitfield_defn = self.spec.bitfields[bitfield_defn_index]
+                        if len(int_bit_string) != bitfield_defn.size:
+                            print("ERROR: When parsing a '%s' with value '%s', the plugin returned the bitstream '%s' of length %s. However, the bitfield named '%s' (which this bitstream value is being assigned to) expects a bitstream of length %s" % (int_placeholder_name, raw_int_string, int_bit_string, len(int_bit_string), b.bitfield_name, bitfield_defn.size))
+                            raise ValueError
+
+                        b.modifier_type = ModifierTypes.MODIFIER
+                        b.modifier_value = int_bit_string
+                        processed_bitfields.append(b)
+                        break
+
+                if not found_child:
+                    print("ERROR: We have a placeholder bitfield modifier '%s', but none of the child AST nodes are of type INT_TOKEN with a matching name." % int_placeholder_name)
+                    raise ValueError
+
+            else:
+                print("ASSERT ERROR: Unknown type of bitfield modifier being used?")
+                raise ValueError
+        return processed_bitfields
+
+    def is_valid_bitstring(self, bitstring):
+        for c in bitstring:
+            if c == '0' or c == '1':
+                continue
+            else:
+                return False
         return True
