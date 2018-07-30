@@ -45,6 +45,12 @@ class AsmParser:
 
         self.token_buffer = ""
 
+        self.max_parsed_depth = 0
+        self.error_parsed_buffer = ""
+        self.error_expected_buffer = ""
+        self.error_bad_buffer = ""
+        self.expected_stack = []
+
     def get_ast(self):
         return self.ast
 
@@ -95,6 +101,7 @@ class AsmParser:
 
     def parse_current_line(self):
 
+        self.reset_error_buffer()
         self.reset_token_buffer()
         self.line_pos = 0
 
@@ -112,6 +119,9 @@ class AsmParser:
 
         if not is_match:
             print("Assembler ERROR: Unable to parse INSTRUCTION on line %s" % (self.line_num+1))
+            print("PARSED: " + self.error_parsed_buffer)
+            print("EXPECTED: " + self.error_expected_buffer)
+            print("INSTEAD GOT: " + self.error_bad_buffer)
             raise ValueError
 
         return ASTNode(TokenTypes.PLACEHOLDER, "INSTRUCTION", children, bitfield_modifiers)
@@ -129,6 +139,7 @@ class AsmParser:
 
             save_line_pos = self.line_pos
             save_token_buffer = self.token_buffer
+            save_expected_stack = self.expected_stack.copy()
 
             pattern_match, children = self.try_match_token_pattern(token_pattern)
 
@@ -136,6 +147,8 @@ class AsmParser:
                 # Check if the rest of the line is empty if we're trying to match the
                 # top-level pattern
                 pattern_match = self.is_rest_empty()
+                if not pattern_match:
+                    self.error_expected_empty_endline()
 
             if pattern_match:
                 bitfield_modifiers = self.process_int_placeholders(bitfield_modifiers, children)
@@ -143,6 +156,7 @@ class AsmParser:
             else:
                 self.line_pos = save_line_pos
                 self.token_buffer = save_token_buffer
+                self.expected_stack = save_expected_stack
                 continue
 
         return False, [], []
@@ -164,6 +178,8 @@ class AsmParser:
 
             token_type = current_token[0]
             token_value = current_token[1]
+
+            self.push_expected(token_type, token_value)
 
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
@@ -189,6 +205,9 @@ class AsmParser:
                 self.reset_token_buffer()
                 continue
             else:
+
+                self.pop_expected()
+
                 pattern_match = False
                 child_nodes = []
                 break
@@ -320,3 +339,53 @@ class AsmParser:
             else:
                 return False
         return True
+
+    def reset_error_buffer(self):
+        self.max_parsed_depth = 0
+        self.error_parsed_buffer = ""
+        self.error_expected_buffer = ""
+        self.error_parsed_buffer = ""
+        self.expected_stack = []
+        return
+
+    def push_expected(self, token_type, token_value):
+        if token_type == TokenTypes.RAW_TOKEN:
+            self.expected_stack.append("'" + token_value + "'")
+        elif token_type == TokenTypes.WHITESPACE:
+            self.expected_stack.append("' '")
+        elif token_type == TokenTypes.INT_TOKEN:
+            self.expected_stack.append(token_value)
+        elif token_type == TokenTypes.PLACEHOLDER:
+            self.expected_stack.append('%' + token_value + '%')
+        return
+
+    def pop_expected(self):
+
+        if len(self.expected_stack) > self.max_parsed_depth:
+            self.build_error_message()
+
+        del self.expected_stack[-1]
+        return
+
+    def build_error_message(self):
+        self.error_expected_buffer = self.expected_stack[-1]
+        self.error_bad_buffer = self.token_buffer + self.line[self.line_pos:]
+        self.max_parsed_depth = len(self.expected_stack)
+
+        self.error_parsed_buffer = ""
+        for parsed_token in self.expected_stack[:-1]:
+            self.error_parsed_buffer += parsed_token + " "
+
+        return
+
+    def error_expected_empty_endline(self):
+        if len(self.expected_stack) > self.max_parsed_depth:
+            self.error_expected_buffer = "<< rest of line should be empty >>"
+            self.error_bad_buffer = self.token_buffer[-1:] + self.line[self.line_pos:]
+            self.max_parsed_depth = len(self.expected_stack)
+
+            self.error_parsed_buffer = ""
+            for parsed_token in self.expected_stack:
+                self.error_parsed_buffer += parsed_token + " "
+
+        return
