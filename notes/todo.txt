@@ -1,14 +1,13 @@
+- labels, directives?
 
-
-- build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
 
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
 - support tabs \t and whitespaces
 
 - need to make pointer expressions more complex
-- labels, directives?
 - handle case sensitive stuff?
+- data statements
 - string literals? 
 
 - implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
@@ -30,3 +29,5 @@
 
 [x] constraints on integer immediates. Parsing integer immediates.
 [x] Plugin system for parsing integer immediates, and emitting their bitcode.
+
+[x] build diagnostic error message as you parse, show the one with the longest parse depth in case of parse error

@@ -151,11 +151,16 @@ July 29 work
 
 =======
 
-July 30
+July 30 meeting
 
 - Talk about how you need a plugin interface, why it's necessary
 - Work on user manual. 
 - talk about how we handle 90% of asm languages, but how it would take a lot of effort to handle the exotic onces. Goal is not to make something which handles every possible language, but is still flexible. Talk about plugins here. Plugin system can handle 17 bit word, say so!! 
 - Talk about ease of learning and using notation. 
 
+=======
 
+July 30 work
+
+- Implemented error handling. Works well, is elegant :) 
+- In report, talk about how error handling works. We keep a stack of what we have parsed so far, and we keep track of which combination leads to the most tokens being parsed. If there is an error, we show the max amount of tokens we were able to parse, what we expected, and what we instead got. 
