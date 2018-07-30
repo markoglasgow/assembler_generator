@@ -135,5 +135,27 @@ July 28 work
 
 - Installed BitString and emitted actual bytes
 - Use Capstone to disassemble bytes, test it against expected assembly
+- Started working on plugin system, on parsing ints, and on emitting bitstream of parsed ints.
+
+=======
+
+July 29 work
+
+- Finished plugin system which can do the following:
+  - provide whitelist of characters for a type of int
+  - parse and verify arbitrary types of ints
+  - emit bitstream for parsed ints
+
+- did serious integrations in spec, AST, and bitstream emitter for parsing arbitrary ints.
+- modified x86 spec to use new functionality for parsing ints. Specifically, added the MOV REG, IMM instruction types, and used them in assembler and test disassembly listing. 
+
+=======
+
+July 30
+
+- Talk about how you need a plugin interface, why it's necessary
+- Work on user manual. 
+- talk about how we handle 90% of asm languages, but how it would take a lot of effort to handle the exotic onces. Goal is not to make something which handles every possible language, but is still flexible. Talk about plugins here. Plugin system can handle 17 bit word, say so!! 
+- Talk about ease of learning and using notation. 
 
 

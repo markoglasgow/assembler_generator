@@ -1,6 +1,4 @@
-- constraints on integer immediates. Parsing integer immediates.
-- Plugin system for parsing integer immediates, and emitting their bitcode.
-- make all bitfield values used BitArray instead of strings
+
 
 - build diagnostic error message as you parse, show the one with the longest 'pos' in case of parse error
 
@@ -13,7 +11,12 @@
 - handle case sensitive stuff?
 - string literals? 
 
+- implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
+
+- emit MachO or ELF files of assembled programs. Will be tied to work on directives.
+
 - detect recursive definitions in the grammar?
+- make all bitfield values used BitArray instead of strings?
 
 - burroughs 5500 
 - BitArray: 
@@ -24,3 +27,6 @@
 
 [x] Install BitString and emit actual bitstream
 [x] Use Capstone to disassemble bitstream, test it against expected assembly
+
+[x] constraints on integer immediates. Parsing integer immediates.
+[x] Plugin system for parsing integer immediates, and emitting their bitcode.
