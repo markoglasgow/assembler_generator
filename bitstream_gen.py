@@ -78,6 +78,15 @@ class BitstreamGenerator:
             if b.modifier_type == ModifierTypes.MODIFIER:
                 idx = self.get_bitfield_index(b.bitfield_name)
                 bitfields[idx].set_value(b.modifier_value)
+            elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER:
+                print("ERROR: There should be no unprocessed bitfield modifiers of type INT_PLACEHOLDER by this point")
+                raise ValueError
+            elif b.modifier_type == ModifierTypes.LABEL_PLACEHOLDER:
+                idx = self.get_bitfield_index(b.bitfield_name)
+                bitfields[idx].set_value("0" * bitfields[idx].size)
+            else:
+                print("ERROR: Unknown type of bitfield modifier?")
+                raise ValueError
 
         for child_node in ast_node.child_nodes:
             bitfields = self.set_bitfields(bitfields, child_node)

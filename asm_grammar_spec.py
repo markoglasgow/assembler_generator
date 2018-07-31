@@ -22,6 +22,7 @@ class TokenTypes(Enum):
 class ModifierTypes(Enum):
     MODIFIER = 1
     INT_PLACEHOLDER = 2
+    LABEL_PLACEHOLDER = 3
 
 
 class BitfieldModifier:
@@ -370,11 +371,20 @@ class AsmGrammarSpec:
                 raise ValueError
 
             if modifier_arr[1].startswith("%") and modifier_arr[1].endswith("%"):
-                int_placeholder_name = modifier_arr[1][1:-1]
-                if not AsmIntTypes.is_defined_type(int_placeholder_name):
-                    print("ERROR: Unknown bitfield modifier int placeholder '%s' on line %s. Please make sure that this int type is defined in a plugin." % (modifier_arr[1], line_num + 1))
+                placeholder_name = modifier_arr[1][1:-1]
+                if placeholder_name.startswith("int_"):
+                    if not AsmIntTypes.is_defined_type(placeholder_name):
+                        print("ERROR: Unknown bitfield modifier int placeholder '%s' on line %s. Please make sure that this int type is defined in a plugin." % (modifier_arr[1], line_num + 1))
+                        raise ValueError
+                    return BitfieldModifier(ModifierTypes.INT_PLACEHOLDER, bitfield_name, placeholder_name)
+                elif placeholder_name.startswith("label_"):
+                    if not AsmIntTypes.is_defined_type(placeholder_name):
+                        print("ERROR: Unknown bitfield modifier label placeholder '%s' on line %s. Please make sure that this label type is defined in a plugin." % (modifier_arr[1], line_num + 1))
+                        raise ValueError
+                    return BitfieldModifier(ModifierTypes.LABEL_PLACEHOLDER, bitfield_name, placeholder_name)
+                else:
+                    print("ERROR: Unknown type of bitfield modifier placeholder '%s' on line '%s'" % (modifier_arr[1], line_num + 1))
                     raise ValueError
-                return BitfieldModifier(ModifierTypes.INT_PLACEHOLDER, bitfield_name, int_placeholder_name)
 
             bitfield_value = self.read_modifier_value(modifier_arr[1])
             if bitfield_value is None:

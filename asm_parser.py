@@ -335,7 +335,7 @@ class AsmParser:
         processed_bitfields = []
         for b in bitfield_modifiers:
 
-            if b.modifier_type == ModifierTypes.MODIFIER:
+            if b.modifier_type == ModifierTypes.MODIFIER or b.modifier_type == ModifierTypes.LABEL_PLACEHOLDER:
                 processed_bitfields.append(b)
 
             elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER:

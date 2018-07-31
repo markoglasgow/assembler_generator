@@ -79,8 +79,11 @@ def print_bitfield_modifiers(ast_node: ASTNode):
         ret_val += ":: "
         if b.modifier_type == ModifierTypes.MODIFIER:
             ret_val += b.bitfield_name + "=" + b.modifier_value
-        elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER:
+        elif b.modifier_type == ModifierTypes.INT_PLACEHOLDER or b.modifier_type == ModifierTypes.LABEL_PLACEHOLDER:
             ret_val += b.bitfield_name + "=%" + b.modifier_value + "%"
+        else:
+            print("ERROR: Unknown type of bitfield modifier?")
+            raise ValueError
 
         ret_val += " "
 

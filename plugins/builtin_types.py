@@ -14,16 +14,17 @@ class PluginOne(IPlugin):
         for c in self.valid_chars:
             self.valid_chars_map[c] = True
 
-        self.registered_int_types = {
+        self.registered_types = {
             "int_32_bits": True,
             "int_16_bits": True,
             "int_8_bits": True,
+            "label_x86_imm_32_bits": True,
         }
 
         return
 
     def get_registered_types(self):
-        return self.registered_int_types
+        return self.registered_types
 
     def chars_int_32_bits(self):
         return self.valid_chars_map
@@ -98,3 +99,7 @@ class PluginOne(IPlugin):
         b = BitArray(int=parsed_int, length=8)
         b.byteswap()
         return b.bin
+
+    def calc_label_x86_imm_32_bits(self, source_instruction_address, label_address):
+        # TODO: Implement label calculation
+        return
