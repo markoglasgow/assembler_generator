@@ -2,7 +2,7 @@ from asm_int_types import AsmIntTypes
 from asm_grammar_spec import AsmGrammarSpec, AsmInstructionDefinition, TokenTypes, BitfieldModifier, ModifierTypes
 from parse_utils import ParseUtils
 from enum import Enum
-from typing import List
+from typing import List, Dict
 
 
 class TokenMatchType(Enum):
@@ -14,9 +14,10 @@ class TokenMatchType(Enum):
 class ASTNode:
 
     def __init__(self, token_type=None, token_value=None, child_nodes=None, bitfield_modifiers=None):
-        self.token_type = token_type    # type: TokenTypes
-        self.token_value = token_value  # type: str
-        self.original_line = ""         # type: str
+        self.token_type = token_type        # type: TokenTypes
+        self.token_value = token_value      # type: str
+        self.original_line = ""             # type: str
+        self.original_line_line_num = 0     # type: int
         if child_nodes is None:
             self.child_nodes = []
         else:
@@ -27,8 +28,9 @@ class ASTNode:
             self.bitfield_modifiers = bitfield_modifiers  # type: List[BitfieldModifier]
         return
 
-    def set_original_line(self, line):
+    def set_original_line(self, line: str, line_num: int):
         self.original_line = line
+        self.original_line_line_num = line_num
         return
 
 
@@ -36,9 +38,12 @@ class AsmParser:
 
     def __init__(self, spec: AsmGrammarSpec):
 
-        self.spec = spec  # type: AsmGrammarSpec
-        self.ast = []     # type: List[ASTNode]
+        self.spec = spec        # type: AsmGrammarSpec
+        self.ast = []           # type: List[ASTNode]
 
+        self.labels_map = {}    # type: Dict[int, str]
+
+        self.input_file = ""
         self.line_num = 0
         self.line = ""
         self.line_pos = 0
@@ -57,11 +62,35 @@ class AsmParser:
     def parse_asm_listing(self, input_file_path: str):
 
         with open(input_file_path, "r") as f:
-            input_file = f.readlines()
+            self.input_file = f.readlines()
+
+        self.parse_labels()
+        self.parse_asm()
+
+        return
+
+    def parse_labels(self):
 
         self.line_num = 0
-        while self.line_num < len(input_file):
-            self.line = input_file[self.line_num].strip()
+        while self.line_num < len(self.input_file):
+            self.line = self.input_file[self.line_num].strip()
+
+            # Skip empty lines and comments
+            # TODO: Make comment character configurable. Add support for comments on code lines.
+            if len(self.line) == 0 or self.line.startswith(";"):
+                self.line_num += 1
+                continue
+
+            self.parse_line_labels()
+            self.line_num += 1
+
+        return
+
+    def parse_asm(self):
+
+        self.line_num = 0
+        while self.line_num < len(self.input_file):
+            self.line = self.input_file[self.line_num].strip()
 
             # Skip empty lines and comments
             # TODO: Make comment character configurable. Add support for comments on code lines.
@@ -105,8 +134,16 @@ class AsmParser:
         self.reset_token_buffer()
         self.line_pos = 0
 
+        # If there is a label on this line, skip over reading it.
+        if self.line_num in self.labels_map:
+            self.line_pos = len(self.labels_map[self.line_num] + ":")
+            self.line_pos = ParseUtils.skip_whitespace(self.line, self.line_pos)
+            # If the rest of the line is whitespace, there is no instruction to parse, so immediately return.
+            if self.line_pos == len(self.line):
+                return
+
         instruction_node = self.parse_instruction()  # type: ASTNode
-        instruction_node.set_original_line(self.line)
+        instruction_node.set_original_line(self.line, self.line_num)
 
         self.add_ast_node(instruction_node)
 
@@ -387,5 +424,19 @@ class AsmParser:
             self.error_parsed_buffer = ""
             for parsed_token in self.expected_stack:
                 self.error_parsed_buffer += parsed_token + " "
+
+        return
+
+    def parse_line_labels(self):
+
+        # TODO: Maybe allow for labels of a different format from "label_name:"
+        if ":" not in self.line:
+            return
+
+        possible_label, pos = ParseUtils.read_token(self.line, 0, break_chars=[' ', ':'], valid_chars=ParseUtils.valid_identifier_chars_map)
+        end_char = ParseUtils.read_next_char(self.line, pos)
+
+        if end_char is not None and end_char == ":":
+            self.labels_map[self.line_num] = possible_label
 
         return
