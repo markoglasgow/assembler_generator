@@ -1,5 +1,6 @@
 - labels, directives?
-
+- data statements
+- string literals? 
 
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
@@ -7,15 +8,13 @@
 
 - need to make pointer expressions more complex
 - handle case sensitive stuff?
-- data statements
-- string literals? 
 
 - implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
 
 - emit MachO or ELF files of assembled programs. Will be tied to work on directives.
 
 - detect recursive definitions in the grammar?
-- make all bitfield values used BitArray instead of strings?
+- make all bitfield values use BitArray instead of strings?
 
 - burroughs 5500 
 - BitArray: 
