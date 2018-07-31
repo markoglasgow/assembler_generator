@@ -17,7 +17,8 @@ class ASTNode:
         self.token_type = token_type        # type: TokenTypes
         self.token_value = token_value      # type: str
         self.original_line = ""             # type: str
-        self.original_line_line_num = 0     # type: int
+        self.original_line_num = -1         # type: int
+        self.labels = []                    # type: List[str]
         if child_nodes is None:
             self.child_nodes = []
         else:
@@ -30,7 +31,7 @@ class ASTNode:
 
     def set_original_line(self, line: str, line_num: int):
         self.original_line = line
-        self.original_line_line_num = line_num
+        self.original_line_num = line_num
         return
 
 
@@ -66,6 +67,7 @@ class AsmParser:
 
         self.parse_labels()
         self.parse_asm()
+        self.assign_labels()
 
         return
 
@@ -438,5 +440,29 @@ class AsmParser:
 
         if end_char is not None and end_char == ":":
             self.labels_map[self.line_num] = possible_label
+
+        return
+
+    # Assigns labels to AST nodes.
+    def assign_labels(self):
+
+        # First build a list where each entry of the list corresponds to a line num. The list keeps track of which
+        # AST node a label would point to, if there was a label on that line.
+        assignment_list = [-1] * len(self.input_file)
+        for ast_index, ast_node in enumerate(self.ast):
+            if ast_node.original_line_num >= 0:
+                idx = ast_node.original_line_num
+                while idx >= 0:
+                    if assignment_list[idx] == -1:
+                        assignment_list[idx] = ast_index
+                        idx -= 1
+                    else:
+                        break
+
+        # Now go through the map of labels. For each label, look up which AST node is belongs to, and then assign it
+        # to that AST node.
+        for label_line_num in self.labels_map:
+            ast_idx = assignment_list[label_line_num]
+            self.ast[ast_idx].labels.append(self.labels_map[label_line_num])
 
         return
