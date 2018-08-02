@@ -19,10 +19,12 @@ class ASTNode:
         self.original_line = ""             # type: str
         self.original_line_num = -1         # type: int
         self.labels = []                    # type: List[str]
+        self.node_bitfields = None
+        self.address = 0
         if child_nodes is None:
-            self.child_nodes = []
+            self.child_nodes = []                         # type: List[ASTNode]
         else:
-            self.child_nodes = child_nodes
+            self.child_nodes = child_nodes                # type: List[ASTNode]
         if bitfield_modifiers is None:
             self.bitfield_modifiers = []                  # type: List[BitfieldModifier]
         else:
@@ -34,6 +36,14 @@ class ASTNode:
         self.original_line_num = line_num
         return
 
+    def set_node_bitfields(self, bitfields):
+        self.node_bitfields = bitfields
+        return
+
+    def set_node_address(self, address):
+        self.address = address
+        return
+
 
 class AsmParser:
 
@@ -43,6 +53,7 @@ class AsmParser:
         self.ast = []           # type: List[ASTNode]
 
         self.labels_map = {}    # type: Dict[int, str]
+        self.all_labels = {}    # type: Dict[str, int]
 
         self.input_file = ""
         self.line_num = 0
@@ -224,6 +235,8 @@ class AsmParser:
                 token_match = self.try_match_whitespace_token(token_value)
             elif token_type == TokenTypes.INT_TOKEN:
                 token_match, ast_node = self.try_match_int_token(token_value)
+            elif token_type == TokenTypes.LABEL_TOKEN:
+                token_match, ast_node = self.try_match_label_token(token_value)
             elif token_type == TokenTypes.RAW_TOKEN:
                 token_match, ast_node = self.try_match_raw_token(token_value)
             elif token_type == TokenTypes.PLACEHOLDER:
@@ -278,6 +291,25 @@ class AsmParser:
             if AsmIntTypes.validate_integer(token_value, self.token_buffer):
                 ast_node = ASTNode(TokenTypes.INT_TOKEN, token_value + " " + self.token_buffer, None)
                 token_match = True
+
+        return token_match, ast_node
+
+    def try_match_label_token(self, token_value):
+        token_match = False
+        ast_node = ASTNode()
+
+        valid_chars = ParseUtils.valid_identifier_chars
+
+        if self.read_line_char(to_lower=False, valid_chars=valid_chars) is not False:
+            while self.read_line_char(to_lower=False, valid_chars=valid_chars):
+                continue
+
+            if self.token_buffer in self.all_labels:
+                ast_node = ASTNode(TokenTypes.LABEL_TOKEN, token_value + " " + self.token_buffer, None)
+                token_match = True
+            else:
+                print("ERROR: Unknown label '%s' on line '%s'" % (self.token_buffer, self.line_num+1))
+                raise ValueError
 
         return token_match, ast_node
 
@@ -439,7 +471,11 @@ class AsmParser:
         end_char = ParseUtils.read_next_char(self.line, pos)
 
         if end_char is not None and end_char == ":":
+            if possible_label in self.all_labels:
+                print("ERROR: Duplicate label '%s' on lines %s and %s" % (possible_label, self.line_num+1, self.all_labels[possible_label]+1))
+                raise ValueError
             self.labels_map[self.line_num] = possible_label
+            self.all_labels[possible_label] = self.line_num
 
         return
 

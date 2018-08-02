@@ -17,6 +17,7 @@ class TokenTypes(Enum):
     RAW_TOKEN = 2
     PLACEHOLDER = 3
     INT_TOKEN = 4
+    LABEL_TOKEN = 5
 
 
 class ModifierTypes(Enum):
@@ -337,6 +338,11 @@ class AsmGrammarSpec:
                             print("ERROR: int of type '%s' is not defined in any plugin. Line: %s" % (next_token, line_num+1))
                             raise ValueError
                         pattern_tokens.append((TokenTypes.INT_TOKEN, next_token))
+                    elif next_token.startswith("label_"):
+                        if not AsmIntTypes.is_defined_type(next_token):
+                            print("ERROR: label of type '%s' is not defined in any plugin. Line: %s" % (next_token, line_num+1))
+                            raise ValueError
+                        pattern_tokens.append((TokenTypes.LABEL_TOKEN, next_token))
                     else:
                         pattern_tokens.append((TokenTypes.RAW_TOKEN, next_token))
 

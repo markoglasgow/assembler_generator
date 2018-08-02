@@ -1,10 +1,15 @@
-from asm_grammar_spec import AsmGrammarSpec, ModifierTypes, BitfieldModifier, BitfieldDefinition
+from asm_grammar_spec import AsmGrammarSpec, TokenTypes, ModifierTypes, BitfieldModifier, BitfieldDefinition
 from asm_parser import ASTNode
+from asm_int_types import AsmIntTypes
 
-from typing import List
+from typing import List, Dict
 
 from tabulate import tabulate
 from bitstring import BitArray
+
+
+DEFAULT_IMAGEBASE = 0x1000
+DEFAULT_BYTE_BITSIZE = 8
 
 
 class Bitfield:
@@ -30,25 +35,43 @@ class BitstreamGenerator:
     def get_bytes(self):
 
         bitstream = BitArray()
+        current_address = DEFAULT_IMAGEBASE
+        labels_to_addresses_map = {}
+
         for ast_node in self.ast:
-            node_bitfields = self.get_node_bitfields(ast_node)
-            node_bitarray = self.bitfields_to_bitarray(node_bitfields)
+            ast_node.set_node_bitfields(self.compute_node_bitfields(ast_node))
+            ast_node.set_node_address(current_address)
+            for lbl in ast_node.labels:
+                labels_to_addresses_map[lbl] = ast_node.address
+            # TODO: What happens with addressing in non-standard word sizes?
+            bit_length = self.bitfields_to_bitarray(ast_node.node_bitfields).length
+            byte_length = int(bit_length / DEFAULT_BYTE_BITSIZE)
+            if bit_length % DEFAULT_BYTE_BITSIZE != 0:
+                byte_length += 1
+            current_address += byte_length
+
+        for ast_node in self.ast:
+            self.update_label_placeholders(ast_node, labels_to_addresses_map)
+
+        for ast_node in self.ast:
+            ast_node.set_node_bitfields(self.compute_node_bitfields(ast_node))
+            node_bitarray = self.bitfields_to_bitarray(ast_node.node_bitfields)
             bitstream.append(node_bitarray)
 
         return bitstream.tobytes()
 
     def print_debug_bitstream(self):
 
+        self.get_bytes()
+
         for ast_node in self.ast:
             if len(ast_node.original_line) > 0:
                 print(ast_node.original_line)
 
-            bitfields = self.get_node_bitfields(ast_node)
-
-            headers, values = self.get_debug_str_lines(bitfields)
+            headers, values = self.get_debug_str_lines(ast_node.node_bitfields)
             print(tabulate(values, headers=headers))
 
-            bitarray = self.bitfields_to_bitarray(bitfields)
+            bitarray = self.bitfields_to_bitarray(ast_node.node_bitfields)
             bytes_padded = str(bitarray.tobytes()).replace("'\\x", "").replace("'", "").replace("\\", "").replace("b", "").replace("x", " ")
             print("Bytes (padded): ")
             print(bytes_padded)
@@ -57,7 +80,7 @@ class BitstreamGenerator:
 
         return
 
-    def get_node_bitfields(self, ast_node):
+    def compute_node_bitfields(self, ast_node):
 
         bitfields = self.get_possible_bitfields()
         bitfields = self.set_bitfields(bitfields, ast_node)
@@ -120,3 +143,38 @@ class BitstreamGenerator:
                 retval.append('0b' + b.value)
 
         return retval
+
+    def update_label_placeholders(self, ast_node: ASTNode, labels_to_addresses_map: Dict[str, int]):
+
+        for b in ast_node.bitfield_modifiers:
+            if b.modifier_type == ModifierTypes.LABEL_PLACEHOLDER:
+                label_placeholder_value = b.modifier_value
+                current_address = ast_node.address
+                label_address = 0
+
+                found_child = False
+                for child_node in ast_node.child_nodes:
+                    if child_node.token_type == TokenTypes.LABEL_TOKEN and child_node.token_value.startswith(label_placeholder_value + " "):
+                        found_child = True
+                        label_name = child_node.token_value[len(label_placeholder_value + " "):]
+
+                        if label_name not in labels_to_addresses_map:
+                            print("Bitstream Generation ERROR: Unknown label in bitfield '%s' modifier" % label_name)
+                            raise ValueError
+
+                        label_address = labels_to_addresses_map[label_name]
+                        break
+
+                if not found_child:
+                    print("Bitstream Generation ERROR: We have a placeholder bitfield modifier '%s', but none of the child AST nodes are of type LABEL_TOKEN with a matching name." % label_placeholder_value)
+                    raise ValueError
+
+                labels_bits = AsmIntTypes.calc_label_bits(label_placeholder_value, current_address, label_address)
+
+                b.modifier_value = labels_bits
+                b.modifier_type = ModifierTypes.MODIFIER
+
+        for child_node in ast_node.child_nodes:
+            self.update_label_placeholders(child_node, labels_to_addresses_map)
+
+        return
