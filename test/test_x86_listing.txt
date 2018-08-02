@@ -14,3 +14,7 @@ mov bx, 01337h
 mov al, -1
 push test_label1
 jmp test_label2
+db 090h
+db 090h
+dw 09090h
+dd 090909090h

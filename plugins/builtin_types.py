@@ -40,7 +40,7 @@ class PluginOne(IPlugin):
         parsed_int = self.parse_int(int_string)
         if parsed_int is None:
             return False
-        elif -2147483648 <= parsed_int <= 2147483647:
+        elif -2147483648 <= parsed_int <= 4294967295:
             return True
         else:
             return False
@@ -49,7 +49,7 @@ class PluginOne(IPlugin):
         parsed_int = self.parse_int(int_string)
         if parsed_int is None:
             return False
-        elif -32768 <= parsed_int <= 32767:
+        elif -32768 <= parsed_int <= 65535:
             return True
         else:
             return False
@@ -58,7 +58,7 @@ class PluginOne(IPlugin):
         parsed_int = self.parse_int(int_string)
         if parsed_int is None:
             return False
-        elif -128 <= parsed_int <= 127:
+        elif -128 <= parsed_int <= 255:
             return True
         else:
             return False
@@ -85,19 +85,28 @@ class PluginOne(IPlugin):
 
     def emit_int_32_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = BitArray(int=parsed_int, length=32)
+        if parsed_int < 2147483648:
+            b = BitArray(int=parsed_int, length=32)
+        else:
+            b = BitArray(uint=parsed_int, length=32)
         b.byteswap()
         return b.bin
 
     def emit_int_16_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = BitArray(int=parsed_int, length=16)
+        if parsed_int < 32768:
+            b = BitArray(int=parsed_int, length=16)
+        else:
+            b = BitArray(uint=parsed_int, length=16)
         b.byteswap()
         return b.bin
 
     def emit_int_8_bits(self, int_string):
         parsed_int = self.parse_int(int_string)
-        b = BitArray(int=parsed_int, length=8)
+        if parsed_int < 128:
+            b = BitArray(int=parsed_int, length=8)
+        else:
+            b = BitArray(uint=parsed_int, length=8)
         b.byteswap()
         return b.bin
 
