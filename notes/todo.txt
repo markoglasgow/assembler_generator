@@ -1,7 +1,7 @@
-- labels, directives?
 - data statements
 - string literals? 
 
+- make bytes print properly in debug statement
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
 - support tabs \t and whitespaces
@@ -12,6 +12,8 @@
 - implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
 
 - emit MachO or ELF files of assembled programs. Will be tied to work on directives.
+
+- implement directives?
 
 - detect recursive definitions in the grammar?
 - make all bitfield values use BitArray instead of strings?
@@ -30,3 +32,5 @@
 [x] Plugin system for parsing integer immediates, and emitting their bitcode.
 
 [x] build diagnostic error message as you parse, show the one with the longest parse depth in case of parse error
+
+[x] Implemented absolute and relative labels, and included in the default builtins immediate and relative x86 labels

@@ -164,3 +164,10 @@ July 30 work
 
 - Implemented error handling. Works well, is elegant :) 
 - In report, talk about how error handling works. We keep a stack of what we have parsed so far, and we keep track of which combination leads to the most tokens being parsed. If there is an error, we show the max amount of tokens we were able to parse, what we expected, and what we instead got. 
+
+========
+
+August 2 work
+
+- Implemented absolute and relative labels, and included in the default builtins immediate and relative x86 labels
+- Talk about how x86 has short and long jumps, and the assembler must divide which one to use based on the distances in between the instructions. Talk about how our assembler doesn't do this, and how the user can optionally implement long/short jumps as jmpl/jmps, but that we cannot handle automatically choosing in between instructions like that. Possible future work? 
