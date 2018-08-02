@@ -100,6 +100,8 @@ class PluginOne(IPlugin):
         b.byteswap()
         return b.bin
 
+    # noinspection PyUnusedLocal
     def calc_label_x86_imm_32_bits(self, source_instruction_address, label_address):
-        # TODO: Implement label calculation
-        return
+        b = BitArray(int=label_address, length=32)
+        b.byteswap()
+        return b.bin

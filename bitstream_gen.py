@@ -1,4 +1,4 @@
-from asm_grammar_spec import AsmGrammarSpec, TokenTypes, ModifierTypes, BitfieldModifier, BitfieldDefinition
+from asm_grammar_spec import AsmGrammarSpec, TokenTypes, ModifierTypes
 from asm_parser import ASTNode
 from asm_int_types import AsmIntTypes
 
