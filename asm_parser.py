@@ -42,6 +42,8 @@ class ASTNode:
 
     def set_node_address(self, address):
         self.address = address
+        for child_node in self.child_nodes:
+            child_node.set_node_address(address)
         return
 
 

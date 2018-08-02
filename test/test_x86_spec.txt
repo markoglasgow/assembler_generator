@@ -66,14 +66,19 @@ size: 32
 .ASM_INSTRUCTIONS
 
 INSTRUCTION = 
+| %PUSH_IMMEDIATE%
 | %MOV_REG_IMMEDIATE%
 | %MNEMONIC_2OPS% %TWO_OPERANDS%
 ;
 
+PUSH_IMMEDIATE = 
+| push %32_BIT_IMMEDIATE%                       :: opcode=0110 1000
+;
+
 MOV_REG_IMMEDIATE = 
-| mov %8_BIT_REG%, %8_BIT_IMMEDIATE%                :: short_opcode=10110
-| mov %16_BIT_REG%, %16_BIT_IMMEDIATE%              :: short_opcode=10111 :: prefix = 0110 0110
-| mov %32_BIT_REG%, %32_BIT_IMMEDIATE%              :: short_opcode=10111
+| mov %8_BIT_REG%, %8_BIT_IMMEDIATE%            :: short_opcode=10110
+| mov %16_BIT_REG%, %16_BIT_IMMEDIATE%          :: short_opcode=10111 :: prefix = 0110 0110
+| mov %32_BIT_REG%, %32_BIT_IMMEDIATE%          :: short_opcode=10111
 ;
 
 MNEMONIC_2OPS =
@@ -158,6 +163,7 @@ POINTER =
 
 32_BIT_IMMEDIATE = 
 | int_32_bits                                   :: immediate_32=%int_32_bits%
+| label_x86_imm_32_bits                         :: immediate_32=%label_x86_imm_32_bits%
 ;
 
 ////////////////////////////////////////
