@@ -171,3 +171,5 @@ August 2 work
 
 - Implemented absolute and relative labels, and included in the default builtins immediate and relative x86 labels
 - Talk about how x86 has short and long jumps, and the assembler must divide which one to use based on the distances in between the instructions. Talk about how our assembler doesn't do this, and how the user can optionally implement long/short jumps as jmpl/jmps, but that we cannot handle automatically choosing in between instructions like that. Possible future work? 
+
+- Added data statements in the spec as a PoC for x86

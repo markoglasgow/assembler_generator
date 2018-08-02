@@ -34,3 +34,5 @@
 [x] build diagnostic error message as you parse, show the one with the longest parse depth in case of parse error
 
 [x] Implemented absolute and relative labels, and included in the default builtins immediate and relative x86 labels
+
+[x] Data statements PoC
