@@ -1,8 +1,16 @@
 test_label1: 
 test_label2: mov al, byte ptr[eax]
 xor eax, ebx
+jmp test_label3
 mov word ptr[ebx], ax
 mov eax, 1
+
+
+
+
+
+test_label3:
 mov bx, 01337h
 mov al, -1
 push test_label1
+jmp test_label2

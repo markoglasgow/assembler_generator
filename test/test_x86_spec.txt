@@ -66,9 +66,14 @@ size: 32
 .ASM_INSTRUCTIONS
 
 INSTRUCTION = 
+| %JUMP_IMMEDIATE%
 | %PUSH_IMMEDIATE%
 | %MOV_REG_IMMEDIATE%
 | %MNEMONIC_2OPS% %TWO_OPERANDS%
+;
+
+JUMP_IMMEDIATE =
+| jmp label_x86_rel_32_bit_branch               :: opcode=1110 1001 :: immediate_32=%label_x86_rel_32_bit_branch%
 ;
 
 PUSH_IMMEDIATE = 

@@ -19,6 +19,7 @@ class PluginOne(IPlugin):
             "int_16_bits": True,
             "int_8_bits": True,
             "label_x86_imm_32_bits": True,
+            "label_x86_rel_32_bit_branch": True,
         }
 
         return
@@ -103,5 +104,11 @@ class PluginOne(IPlugin):
     # noinspection PyUnusedLocal
     def calc_label_x86_imm_32_bits(self, source_instruction_address, label_address):
         b = BitArray(int=label_address, length=32)
+        b.byteswap()
+        return b.bin
+
+    def calc_label_x86_rel_32_bit_branch(self, source_instruction_address, label_address):
+        rel = label_address - source_instruction_address - 5
+        b = BitArray(int=rel, length=32)
         b.byteswap()
         return b.bin

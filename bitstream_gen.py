@@ -1,4 +1,4 @@
-from asm_grammar_spec import AsmGrammarSpec, TokenTypes, ModifierTypes
+from asm_grammar_spec import AsmGrammarSpec, TokenTypes, ModifierTypes, BitfieldModifier
 from asm_parser import ASTNode
 from asm_int_types import AsmIntTypes
 
@@ -146,7 +146,7 @@ class BitstreamGenerator:
 
     def update_label_placeholders(self, ast_node: ASTNode, labels_to_addresses_map: Dict[str, int]):
 
-        for b in ast_node.bitfield_modifiers:
+        for idx, b in enumerate(ast_node.bitfield_modifiers):
             if b.modifier_type == ModifierTypes.LABEL_PLACEHOLDER:
                 label_placeholder_value = b.modifier_value
                 current_address = ast_node.address
@@ -169,10 +169,9 @@ class BitstreamGenerator:
                     print("Bitstream Generation ERROR: We have a placeholder bitfield modifier '%s', but none of the child AST nodes are of type LABEL_TOKEN with a matching name." % label_placeholder_value)
                     raise ValueError
 
-                labels_bits = AsmIntTypes.calc_label_bits(label_placeholder_value, current_address, label_address)
+                label_bits = AsmIntTypes.calc_label_bits(label_placeholder_value, current_address, label_address)
 
-                b.modifier_value = labels_bits
-                b.modifier_type = ModifierTypes.MODIFIER
+                ast_node.bitfield_modifiers[idx] = BitfieldModifier(ModifierTypes.MODIFIER, b.bitfield_name, label_bits)
 
         for child_node in ast_node.child_nodes:
             self.update_label_placeholders(child_node, labels_to_addresses_map)
