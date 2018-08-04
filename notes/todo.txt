@@ -1,9 +1,7 @@
 - string literals? 
 
-- make bytes print properly in debug statement
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
-- support tabs \t and whitespaces
 
 - need to make pointer expressions more complex
 - handle case sensitive stuff?
@@ -47,3 +45,6 @@
 [x] Implemented absolute and relative labels, and included in the default builtins immediate and relative x86 labels
 
 [x] Data statements PoC
+
+[x] support tabs \t as whitespaces
+[x] make bytes print properly in debug statement

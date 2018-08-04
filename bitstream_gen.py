@@ -72,7 +72,7 @@ class BitstreamGenerator:
             print(tabulate(values, headers=headers))
 
             bitarray = self.bitfields_to_bitarray(ast_node.node_bitfields)
-            bytes_padded = str(bitarray.tobytes()).replace("'\\x", "").replace("'", "").replace("\\", "").replace("b", "").replace("x", " ")
+            bytes_padded = self.bytes_to_string(bitarray.tobytes())
             print("Bytes (padded): ")
             print(bytes_padded)
 
@@ -134,6 +134,12 @@ class BitstreamGenerator:
         values.append(value_row)
 
         return headers, values
+
+    def bytes_to_string(self, byte_array):
+        s = ""
+        for b in byte_array:
+            s += str("{:02X} ").format(b)
+        return s
 
     def bitfields_to_bitarray(self, bitfields: List[Bitfield]) -> BitArray:
 
