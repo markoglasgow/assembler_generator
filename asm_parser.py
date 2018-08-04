@@ -358,7 +358,7 @@ class AsmParser:
             # TODO: Add support for other comment characters. Check that comment char is not in string literal.
             if c == ';':
                 return True
-            elif c == ' ':
+            elif c == ' ' or c == '\t':
                 continue
             else:
                 return False
@@ -469,7 +469,7 @@ class AsmParser:
         if ":" not in self.line:
             return
 
-        possible_label, pos = ParseUtils.read_token(self.line, 0, break_chars=[' ', ':'], valid_chars=ParseUtils.valid_identifier_chars_map)
+        possible_label, pos = ParseUtils.read_token(self.line, 0, break_chars=[' ', '\t', ':'], valid_chars=ParseUtils.valid_identifier_chars_map)
         end_char = ParseUtils.read_next_char(self.line, pos)
 
         if end_char is not None and end_char == ":":

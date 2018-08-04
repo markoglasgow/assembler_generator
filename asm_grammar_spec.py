@@ -287,7 +287,7 @@ class AsmGrammarSpec:
 
         pattern_tokens = []
         bitfield_modifiers = []
-        first_token, pos = ParseUtils.read_token(line, 0, break_chars=[' '], valid_chars={"|": "", ";": ""})
+        first_token, pos = ParseUtils.read_token(line, 0, break_chars=[' ', '\t'], valid_chars={"|": "", ";": ""})
 
         if first_token == ";":
             return None
@@ -311,7 +311,7 @@ class AsmGrammarSpec:
                     pos += 1
                     pattern_tokens.append((TokenTypes.PLACEHOLDER, placeholder_name))
 
-                elif next_char == ' ':
+                elif next_char == ' ' or next_char == '\t':
                     pattern_tokens.append((TokenTypes.WHITESPACE, " "))
                     pos = ParseUtils.skip_whitespace(line, pos)
 
@@ -332,7 +332,7 @@ class AsmGrammarSpec:
                         raise ValueError
 
                 else:
-                    next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '%'])
+                    next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '\t', '%'])
                     if next_token.startswith("int_"):
                         if not AsmIntTypes.is_defined_type(next_token):
                             print("ERROR: int of type '%s' is not defined in any plugin. Line: %s" % (next_token, line_num+1))

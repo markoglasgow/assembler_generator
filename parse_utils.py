@@ -17,7 +17,7 @@ class ParseUtils:
     def read_token(input_string, start_pos=0, break_chars=None, valid_chars=None) -> Tuple[str, int]:
 
         if break_chars is None:
-            break_chars = [' ']
+            break_chars = [' ', '\t']
 
         token = ""
 
@@ -40,17 +40,17 @@ class ParseUtils:
 
     @staticmethod
     def read_identifier(input_string, start_pos=0) -> Tuple[str, int]:
-        return ParseUtils.read_token(input_string, start_pos, break_chars=[' '], valid_chars=ParseUtils.valid_identifier_chars_map)
+        return ParseUtils.read_token(input_string, start_pos, break_chars=[' ', '\t'], valid_chars=ParseUtils.valid_identifier_chars_map)
 
     @staticmethod
     def read_number(input_string, start_pos=0) -> Tuple[str, int]:
-        return ParseUtils.read_token(input_string, start_pos, break_chars=[' '], valid_chars=ParseUtils.valid_number_chars_map)
+        return ParseUtils.read_token(input_string, start_pos, break_chars=[' ', '\t'], valid_chars=ParseUtils.valid_number_chars_map)
 
     @staticmethod
     def skip_whitespace(input_string, start_pos=0):
 
         pos = start_pos
-        while pos < len(input_string) and input_string[pos] == ' ':
+        while pos < len(input_string) and (input_string[pos] == ' ' or input_string[pos] == '\t'):
             pos += 1
 
         return pos

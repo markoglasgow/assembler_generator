@@ -74,9 +74,9 @@ INSTRUCTION =
 ;
 
 DATA_STATEMENT = 
-| db int_8_bits                                 :: immediate_8=%int_8_bits%
-| dw int_16_bits                                :: immediate_16=%int_16_bits%
-| dd int_32_bits                                :: immediate_32=%int_32_bits%
+| db int_8_bits									:: immediate_8=%int_8_bits%
+| dw int_16_bits								:: immediate_16=%int_16_bits%
+| dd int_32_bits								:: immediate_32=%int_32_bits%
 ;
 
 JUMP_IMMEDIATE =

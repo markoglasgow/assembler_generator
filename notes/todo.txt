@@ -1,4 +1,3 @@
-- data statements
 - string literals? 
 
 - make bytes print properly in debug statement
@@ -22,6 +21,18 @@
 - BitArray: 
 - https://pythonhosted.org/bitstring/index.html
 
+- Make documentation
+- Make a tutorial walkthrough
+
+- Command line options for:
+- Input spec
+- Input ASM listing
+- Output format (text, binary blob, or exe template)
+- Verbose print AST
+- Verbose print bitstream
+- Print disassembly of generated code
+
+- Comment the code
 
 ====================
 
