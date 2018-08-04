@@ -272,7 +272,7 @@ class AsmParser:
         token_match = False
 
         if self.read_line_char() is not False:
-            if self.match_token(token_value) != TokenMatchType.NO_MATCH:
+            if self.match_token(' ') != TokenMatchType.NO_MATCH or self.match_token('\t') != TokenMatchType.NO_MATCH:
                 self.skip_line_whitespace()
                 token_match = True
             else:
