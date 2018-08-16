@@ -20,6 +20,18 @@ class ObjectWriter:
 
         offset, size = self.read_template_info(info_file_path)
 
+        if len(self.raw_bytes) > size:
+            print("Object Writer Error: Size of assembled code (%s) is larger than available space in binary template" % (len(self.raw_bytes)))
+            raise ValueError
+
+        with open(template_file, "rb") as bin_file:
+            binary_buffer = bin_file.read()
+
+        binary_buffer = self.overwrite_bytes(binary_buffer, self.raw_bytes, offset)
+
+        with open(output_file, "wb+") as out_file:
+            out_file.write(binary_buffer)
+
         return
 
     def read_template_info(self, info_file_path):
@@ -51,3 +63,19 @@ class ObjectWriter:
             raise ValueError
 
         return offset, size
+
+    def overwrite_bytes(self, original_buffer, new_bytes, offset):
+
+        bin_size = len(new_bytes)
+        current_offset = 0
+
+        new_buffer = bytearray()
+
+        while current_offset < len(original_buffer):
+            if offset <= current_offset < offset + bin_size:
+                new_buffer.append(new_bytes[current_offset - offset])
+            else:
+                new_buffer.append(original_buffer[current_offset])
+            current_offset += 1
+
+        return new_buffer
