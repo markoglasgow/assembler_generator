@@ -3,6 +3,7 @@ from asm_parser import AsmParser
 from bitstream_gen import BitstreamGenerator
 from ast_utils import pretty_print_ast
 from asm_int_types import AsmIntTypes
+from obj_writer import ObjectWriter
 
 from capstone import *
 
@@ -15,6 +16,9 @@ DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
 INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
 INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
+
+INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"
+OUTPUT_BIN = "out.exe"
 
 
 def check_disassembly(raw_bytes):
@@ -60,6 +64,9 @@ def main():
     raw_bytes = bits_gen.get_bytes()
 
     check_disassembly(raw_bytes)
+
+    obj_writer = ObjectWriter(raw_bytes)
+    obj_writer.write_object(INPUT_BIN_TEMPLATE, OUTPUT_BIN)
 
 
 if __name__ == '__main__':
