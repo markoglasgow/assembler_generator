@@ -1,4 +1,3 @@
-- string literals? 
 
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
@@ -8,9 +7,10 @@
 
 - implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
 
-- emit MachO or ELF files of assembled programs. Will be tied to work on directives.
+- emit MachO or ELF files of assembled programs. 
 
 - implement directives?
+- string literals? 
 
 - detect recursive definitions in the grammar?
 - make all bitfield values use BitArray instead of strings?
