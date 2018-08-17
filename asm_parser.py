@@ -392,9 +392,8 @@ class AsmParser:
                             print("ERROR: When parsing a '%s' with value '%s', the plugin returned the bitstream '%s' of length %s. However, the bitfield named '%s' (which this bitstream value is being assigned to) expects a bitstream of length %s" % (int_placeholder_name, raw_int_string, int_bit_string, len(int_bit_string), b.bitfield_name, bitfield_defn.size))
                             raise ValueError
 
-                        b.modifier_type = ModifierTypes.MODIFIER
-                        b.modifier_value = int_bit_string
-                        processed_bitfields.append(b)
+                        new_modifier = BitfieldModifier(ModifierTypes.MODIFIER, b.bitfield_name, int_bit_string)
+                        processed_bitfields.append(new_modifier)
                         break
 
                 if not found_child:
