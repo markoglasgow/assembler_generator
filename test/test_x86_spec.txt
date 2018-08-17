@@ -68,8 +68,9 @@ size: 32
 INSTRUCTION = 
 | %DATA_STATEMENT%
 | %JUMP_IMMEDIATE%
-| %PUSH_IMMEDIATE%
+| %PUSH_INSTRUCTION%
 | %MOV_REG_IMMEDIATE%
+| %OP_32REG_8BITVAL%
 | %MNEMONIC_2OPS% %TWO_OPERANDS%
 ;
 
@@ -83,7 +84,8 @@ JUMP_IMMEDIATE =
 | jmp label_x86_rel_32_bit_branch               :: opcode=1110 1001 :: immediate_32=%label_x86_rel_32_bit_branch%
 ;
 
-PUSH_IMMEDIATE = 
+PUSH_INSTRUCTION = 
+| push %32_BIT_REG%								:: short_opcode=0101 0
 | push %32_BIT_IMMEDIATE%                       :: opcode=0110 1000
 ;
 
@@ -91,6 +93,14 @@ MOV_REG_IMMEDIATE =
 | mov %8_BIT_REG%, %8_BIT_IMMEDIATE%            :: short_opcode=10110
 | mov %16_BIT_REG%, %16_BIT_IMMEDIATE%          :: short_opcode=10111 :: prefix = 0110 0110
 | mov %32_BIT_REG%, %32_BIT_IMMEDIATE%          :: short_opcode=10111
+;
+
+OP_32REG_8BITVAL = 
+| %MNEMONIC_2OPS_SHORT% %32_BIT_REG_RM%, %8_BIT_IMMEDIATE%				:: opcode_d=1 :: opcode_s=1 :: mod=11
+;
+
+MNEMONIC_2OPS_SHORT =
+| sub                                           :: opcode=1000 00 :: reg=101
 ;
 
 MNEMONIC_2OPS =
@@ -161,12 +171,24 @@ POINTER =
 
 32_BIT_REG =
 | eax                                           :: reg=000
+| ecx                                           :: reg=001
+| edx                                           :: reg=010
 | ebx                                           :: reg=011
+| esp											:: reg=100
+| ebp											:: reg=101
+| esi											:: reg=110
+| edi 											:: reg=111
 ;
 
 32_BIT_REG_RM =
 | eax                                           :: rm=000
+| ecx                                           :: rm=001
+| edx                                           :: rm=010
 | ebx                                           :: rm=011
+| esp											:: rm=100
+| ebp											:: rm=101
+| esi											:: rm=110
+| edi 											:: rm=111
 ;
 
 32_BIT_MEM_OP = 

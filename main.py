@@ -14,7 +14,8 @@ DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 # DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
 
 INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
-INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
+# INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
+INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
 INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
 
 INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"

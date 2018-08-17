@@ -310,8 +310,9 @@ class AsmParser:
                 ast_node = ASTNode(TokenTypes.LABEL_TOKEN, token_value + " " + self.token_buffer, None)
                 token_match = True
             else:
-                print("ERROR: Unknown label '%s' on line '%s'" % (self.token_buffer, (self.line_num+1)))
-                raise ValueError
+                # print("ERROR: Unknown label '%s' on line '%s'" % (self.token_buffer, (self.line_num+1)))
+                # raise ValueError
+                token_match = False
 
         return token_match, ast_node
 
