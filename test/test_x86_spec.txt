@@ -71,6 +71,8 @@ INSTRUCTION =
 | %PUSH_INSTRUCTION%
 | %MOV_REG_IMMEDIATE%
 | %OP_32REG_8BITVAL%
+| %CALL_REG%
+| %MOV_OPERAND_IMMEDIATE32%
 | %MNEMONIC_2OPS% %TWO_OPERANDS%
 ;
 
@@ -89,10 +91,18 @@ PUSH_INSTRUCTION =
 | push %32_BIT_IMMEDIATE%                       :: opcode=0110 1000
 ;
 
+CALL_REG =
+| call %32_BIT_REG%								:: prefix = 1111 1111 :: short_opcode = 1101 0
+;
+
 MOV_REG_IMMEDIATE = 
 | mov %8_BIT_REG%, %8_BIT_IMMEDIATE%            :: short_opcode=10110
 | mov %16_BIT_REG%, %16_BIT_IMMEDIATE%          :: short_opcode=10111 :: prefix = 0110 0110
 | mov %32_BIT_REG%, %32_BIT_IMMEDIATE%          :: short_opcode=10111
+;
+
+MOV_OPERAND_IMMEDIATE32 =
+| mov %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%       :: opcode=1100 01 :: opcode_d=1 :: opcode_s=1 :: reg=000 :: scale=00 :: index=100 :: base=100
 ;
 
 OP_32REG_8BITVAL = 
@@ -125,7 +135,6 @@ TWO_OPERANDS =
 | %32_BIT_REG%, %32_BIT_REG_RM%                 :: opcode_d=1 :: opcode_s=1 :: mod=11                 
 
 | %32_BIT_MEM_OP%, %32_BIT_REG%                 :: opcode_d=0 :: opcode_s=1  
-| %32_BIT_MEM_OP%, %32_BIT_IMMEDIATE%           :: opcode_d=0 :: opcode_s=1
 ;
 
 8_BIT_REG =

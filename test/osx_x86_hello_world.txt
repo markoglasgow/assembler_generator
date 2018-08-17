@@ -1,3 +1,6 @@
 push ebp
 mov ebp, esp
 sub esp, 8
+mov dword ptr[esp], 01FAAh
+mov eax, 01F8Eh
+call eax
