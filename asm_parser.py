@@ -49,7 +49,7 @@ class ASTNode:
 
 class AsmParser:
 
-    def __init__(self, spec: AsmGrammarSpec):
+    def __init__(self, spec: AsmGrammarSpec, sigma16_labels=False):
 
         self.spec = spec        # type: AsmGrammarSpec
         self.ast = []           # type: List[ASTNode]
@@ -70,6 +70,8 @@ class AsmParser:
         self.error_bad_buffer = ""
         self.expected_stack = []
 
+        self.sigma16_labels = sigma16_labels
+
     def get_ast(self):
         return self.ast
 
@@ -88,11 +90,11 @@ class AsmParser:
 
         self.line_num = 0
         while self.line_num < len(self.input_file):
-            self.line = self.input_file[self.line_num].strip()
+            self.line = self.input_file[self.line_num]
 
             # Skip empty lines and comments
             # TODO: Make comment character configurable. Add support for comments on code lines.
-            if len(self.line) == 0 or self.line.startswith(";"):
+            if len(self.line.strip()) == 0 or self.line.strip().startswith(";"):
                 self.line_num += 1
                 continue
 
@@ -151,7 +153,9 @@ class AsmParser:
 
         # If there is a label on this line, skip over reading it.
         if self.line_num in self.labels_map:
-            self.line_pos = len(self.labels_map[self.line_num] + ":")
+            self.line_pos = len(self.labels_map[self.line_num])
+            if not self.sigma16_labels:
+                self.line_pos += len(":")
             self.line_pos = ParseUtils.skip_whitespace(self.line, self.line_pos)
             # If the rest of the line is whitespace, there is no instruction to parse, so immediately return.
             if self.line_pos == len(self.line):
@@ -466,13 +470,23 @@ class AsmParser:
     def parse_line_labels(self):
 
         # TODO: Maybe allow for labels of a different format from "label_name:"
-        if ":" not in self.line:
+        if self.sigma16_labels and (self.line[0] == ' ' or self.line[0] == '\t'):
             return
+        else:
+            self.line = self.line.strip()
+            if ":" not in self.line:
+                return
 
         possible_label, pos = ParseUtils.read_token(self.line, 0, break_chars=[' ', '\t', ':'], valid_chars=ParseUtils.valid_identifier_chars_map)
         end_char = ParseUtils.read_next_char(self.line, pos)
 
-        if end_char is not None and end_char == ":":
+        is_label = False
+        if self.sigma16_labels and end_char is not None and (end_char == " " or end_char == '\t'):
+            is_label = True
+        elif end_char is not None and end_char == ":":
+            is_label = True
+
+        if is_label:
             if possible_label in self.all_labels:
                 print("ERROR: Duplicate label '%s' on lines %s and %s" % (possible_label, self.line_num+1, self.all_labels[possible_label]+1))
                 raise ValueError
