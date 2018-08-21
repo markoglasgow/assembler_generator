@@ -7,6 +7,27 @@ class ObjectWriter:
         self.raw_bytes = raw_bytes
         return
 
+    def write_sigma16_data(self, output_file):
+
+        if len(self.raw_bytes) % 2 != 0:
+            print("Sigma16 writer error: Sigma16 has 16 bit words, so the buffer length should be divisible by 2. Instead it has a length of %s" % (len(self.raw_bytes)))
+
+        text_buffer = ""
+        current_offset = 0
+
+        while current_offset < len(self.raw_bytes):
+            first_byte = str("{:02x}").format(self.raw_bytes[current_offset])
+            second_byte = str("{:02x}").format(self.raw_bytes[current_offset + 1])
+
+            line = "    data $" + first_byte + second_byte + "\n"
+            text_buffer += line
+            current_offset += 2
+
+        with open(output_file, "w+") as out_file:
+            out_file.write(text_buffer)
+
+        return
+
     def write_object(self, template_file, output_file):
 
         if not os.path.isfile(template_file):

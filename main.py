@@ -75,8 +75,9 @@ def main():
 
     # check_disassembly(raw_bytes)
 
-    # obj_writer = ObjectWriter(raw_bytes)
+    obj_writer = ObjectWriter(raw_bytes)
     # obj_writer.write_object(INPUT_BIN_TEMPLATE, OUTPUT_BIN)
+    obj_writer.write_sigma16_data("/Users/Marko1/Desktop/Sigma16-0.1.7/Sigma16-0.1.7/examples/test_out.asm.txt")
 
 
 if __name__ == '__main__':
