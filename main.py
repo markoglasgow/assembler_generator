@@ -8,17 +8,19 @@ from obj_writer import ObjectWriter
 from capstone import *
 
 TEST_NAME = "sigma16"
+DISASSEMBLER = None
+INPUT_EXPECTED_DISASM_LISTING = ""
 
 # TEST_NAME = "test_x86"
 # DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 
 # TEST_NAME = "test_ARM"
-DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+# DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
 
 INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
 
 # INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
-INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
+# INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
 
 # INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
 
@@ -65,7 +67,7 @@ def main():
     pretty_print_ast(asm_parser.ast)
     print("\n\n")
 
-    bits_gen = BitstreamGenerator(asm_grammar, asm_parser.ast)
+    bits_gen = BitstreamGenerator(asm_grammar, asm_parser.ast, imagebase=0)
     bits_gen.print_debug_bitstream()
     print("\n\n")
 

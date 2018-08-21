@@ -470,8 +470,9 @@ class AsmParser:
     def parse_line_labels(self):
 
         # TODO: Maybe allow for labels of a different format from "label_name:"
-        if self.sigma16_labels and (self.line[0] == ' ' or self.line[0] == '\t'):
-            return
+        if self.sigma16_labels:
+            if self.line[0] == ' ' or self.line[0] == '\t':
+                return
         else:
             self.line = self.line.strip()
             if ":" not in self.line:

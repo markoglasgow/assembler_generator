@@ -56,11 +56,9 @@ class Sigma16Types(IPlugin):
             b = BitArray(int=parsed_int, length=16)
         else:
             b = BitArray(uint=parsed_int, length=16)
-        b.byteswap()
         return b.bin
 
     # noinspection PyUnusedLocal
     def calc_label_sigma16(self, source_instruction_address, label_address):
-        b = BitArray(int=label_address, length=16)
-        b.byteswap()
+        b = BitArray(int=(int(label_address/2)), length=16)
         return b.bin

@@ -27,15 +27,16 @@ class Bitfield:
 
 class BitstreamGenerator:
 
-    def __init__(self, spec: AsmGrammarSpec, ast: List[ASTNode]):
+    def __init__(self, spec: AsmGrammarSpec, ast: List[ASTNode], imagebase=DEFAULT_IMAGEBASE):
         self.spec = spec
         self.ast = ast
+        self.imagebase = imagebase
         return
 
     def get_bytes(self):
 
         bitstream = BitArray()
-        current_address = DEFAULT_IMAGEBASE
+        current_address = self.imagebase
         labels_to_addresses_map = {}
 
         for ast_node in self.ast:
