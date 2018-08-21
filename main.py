@@ -7,18 +7,22 @@ from obj_writer import ObjectWriter
 
 from capstone import *
 
-TEST_NAME = "test_x86"
-DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
+TEST_NAME = "sigma16"
+
+# TEST_NAME = "test_x86"
+# DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 
 # TEST_NAME = "test_ARM"
-# DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
 
 INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
 
-INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
+# INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
 INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
 
 # INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
+
+INPUT_ASM_LISTING = "test/sigma16_Add.asm.txt"
 
 INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"
 OUTPUT_BIN = "out.exe"
@@ -52,7 +56,8 @@ def main():
     asm_grammar.read_spec(INPUT_ASM_GRAMMAR_SPEC)
     print("Read ASM grammar spec ok")
 
-    asm_parser = AsmParser(asm_grammar)
+    # asm_parser = AsmParser(asm_grammar)
+    asm_parser = AsmParser(asm_grammar, sigma16_labels=True)
     asm_parser.parse_asm_listing(INPUT_ASM_LISTING)
     print("Parsed ASM listing ok")
 
@@ -66,10 +71,10 @@ def main():
 
     raw_bytes = bits_gen.get_bytes()
 
-    check_disassembly(raw_bytes)
+    # check_disassembly(raw_bytes)
 
-    obj_writer = ObjectWriter(raw_bytes)
-    obj_writer.write_object(INPUT_BIN_TEMPLATE, OUTPUT_BIN)
+    # obj_writer = ObjectWriter(raw_bytes)
+    # obj_writer.write_object(INPUT_BIN_TEMPLATE, OUTPUT_BIN)
 
 
 if __name__ == '__main__':

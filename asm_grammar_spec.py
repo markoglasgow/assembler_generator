@@ -331,8 +331,14 @@ class AsmGrammarSpec:
                         print("ERROR: Unexpected ':' character on line %s" % (line_num+1))
                         raise ValueError
 
+                # TODO: Is it wise, handling comma characters in a special way like this?
+                elif next_char == ',' or next_char == '[' or next_char == ']':
+                    pos += 1
+                    pattern_tokens.append((TokenTypes.RAW_TOKEN, next_char))
+
                 else:
-                    next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '\t', '%'])
+                    # TODO: Audit [ and ] in the break chars.
+                    next_token, pos = ParseUtils.read_token(line, pos, break_chars=[' ', '\t', '%', '[', ']'])
                     if next_token.startswith("int_"):
                         if not AsmIntTypes.is_defined_type(next_token):
                             print("ERROR: int of type '%s' is not defined in any plugin. Line: %s" % (next_token, line_num+1))
