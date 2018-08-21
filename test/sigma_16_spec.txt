@@ -1,0 +1,124 @@
+////////////////////////////////////////
+.BIT_FIELDS
+
+name: op_code
+size: 4
+
+name: op_d
+size: 4
+
+name: op_a
+size: 4
+
+name: op_b
+size: 4
+
+name: displacement
+size: 16
+
+////////////////////////////////////////
+.ASM_INSTRUCTIONS
+
+INSTRUCTION = 
+| %DATA_STATEMENT%
+| %RX_INSTRUCTION%                                      :: op_code=1111
+| %RXX_INSTRUCTION%
+;
+
+DATA_STATEMENT = 
+| data int_16_bits                                      :: displacement=%int_16_bits%
+;
+
+RXX_INSTRUCTION = 
+| %RXX_MNEMONICS% %REG_D%,%REG_A%,%REG_B%
+;
+
+RXX_MNEMONICS =
+| add                                                   :: op_code=0000
+| sub                                                   :: op_code=0001
+| mul                                                   :: op_code=0010
+| div                                                   :: op_code=0011
+| cmplt                                                 :: op_code=0100
+| cmpeq                                                 :: op_code=0101
+| cmpgt                                                 :: op_code=0110
+| inv                                                   :: op_code=0111
+| and                                                   :: op_code=1000
+| or                                                    :: op_code=1001
+| xor                                                   :: op_code=1010
+| shiftl                                                :: op_code=1011
+| shiftr                                                :: op_code=1100
+| trap                                                  :: op_code=1101
+;
+
+RX_INSTRUCTION = 
+| %RX_MNEMONICS% %REG_D%,label_sigma16[%REG_A%]         :: displacement=%label_sigma16%
+| jump label_sigma16[%REG_A%]                           :: op_b=0011 :: op_d=0000 :: displacement=%label_sigma16%
+;
+
+RX_MNEMONICS = 
+| lea                                                   :: op_b=0000
+| load                                                  :: op_b=0001
+| store                                                 :: op_b=0010
+| jumpf                                                 :: op_b=0100
+| jumpt                                                 :: op_b=0101
+| jal                                                   :: op_b=0110
+;
+
+REG_A = 
+| R0                                                    :: op_a=0000
+| R1                                                    :: op_a=0001
+| R2                                                    :: op_a=0010
+| R3                                                    :: op_a=0011
+| R4                                                    :: op_a=0100
+| R5                                                    :: op_a=0101
+| R6                                                    :: op_a=0110
+| R7                                                    :: op_a=0111
+| R8                                                    :: op_a=1000
+| R9                                                    :: op_a=1001
+| R10                                                   :: op_a=1010
+| R11                                                   :: op_a=1011
+| R12                                                   :: op_a=1100
+| R13                                                   :: op_a=1101
+| R14                                                   :: op_a=1110
+| R15                                                   :: op_a=1111
+;
+
+REG_B = 
+| R0                                                    :: op_b=0000
+| R1                                                    :: op_b=0001
+| R2                                                    :: op_b=0010
+| R3                                                    :: op_b=0011
+| R4                                                    :: op_b=0100
+| R5                                                    :: op_b=0101
+| R6                                                    :: op_b=0110
+| R7                                                    :: op_b=0111
+| R8                                                    :: op_b=1000
+| R9                                                    :: op_b=1001
+| R10                                                   :: op_b=1010
+| R11                                                   :: op_b=1011
+| R12                                                   :: op_b=1100
+| R13                                                   :: op_b=1101
+| R14                                                   :: op_b=1110
+| R15                                                   :: op_b=1111
+;
+
+REG_D = 
+| R0                                                    :: op_d=0000
+| R1                                                    :: op_d=0001
+| R2                                                    :: op_d=0010
+| R3                                                    :: op_d=0011
+| R4                                                    :: op_d=0100
+| R5                                                    :: op_d=0101
+| R6                                                    :: op_d=0110
+| R7                                                    :: op_d=0111
+| R8                                                    :: op_d=1000
+| R9                                                    :: op_d=1001
+| R10                                                   :: op_d=1010
+| R11                                                   :: op_d=1011
+| R12                                                   :: op_d=1100
+| R13                                                   :: op_d=1101
+| R14                                                   :: op_d=1110
+| R15                                                   :: op_d=1111
+;
+
+////////////////////////////////////////
