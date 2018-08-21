@@ -4,7 +4,7 @@ from bitstring import BitArray
 from typing import Optional
 
 
-class PluginOne(IPlugin):
+class BuiltinTypes(IPlugin):
 
     def __init__(self):
         super().__init__()

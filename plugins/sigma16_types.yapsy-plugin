@@ -1,0 +1,9 @@
+[Core]
+Name = Sigma16 Types
+Module = sigma16_types
+
+[Documentation]
+Author = Marko Caklovic
+Version = 1.0
+Website = https://github.com/markoglasgow
+Description = Plugin for parsing and emitting Sigma16 types for the Generic Assembler Generator

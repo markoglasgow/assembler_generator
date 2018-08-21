@@ -26,7 +26,7 @@ INSTRUCTION =
 ;
 
 DATA_STATEMENT = 
-| data int_16_bits                                      :: displacement=%int_16_bits%
+| data int_sigma16_data                                 :: displacement=%int_sigma16_data%
 ;
 
 RXX_INSTRUCTION = 
