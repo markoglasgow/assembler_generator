@@ -1,13 +1,27 @@
+- implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
+- emit MachO or ELF files of assembled programs. 
+- make a Xubuntu VM with all dependencies. Install QEMU and get ARM hello world program running on it.
+- Make documentation
+- Make a tutorial walkthrough
+
+- Command line options for:
+- Input spec
+- Input ASM listing
+- Output format (text, binary blob, or exe template)
+- Verbose print AST
+- Verbose print bitstream
+- Print disassembly of generated code
+- Compare disassembly to expected disassembly
+
+- Comment the code
+
+- Testing system?
 
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
 
 - need to make pointer expressions more complex
 - handle case sensitive stuff?
-
-- implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
-
-- emit MachO or ELF files of assembled programs. 
 
 - implement directives?
 - string literals? 
@@ -19,18 +33,6 @@
 - BitArray: 
 - https://pythonhosted.org/bitstring/index.html
 
-- Make documentation
-- Make a tutorial walkthrough
-
-- Command line options for:
-- Input spec
-- Input ASM listing
-- Output format (text, binary blob, or exe template)
-- Verbose print AST
-- Verbose print bitstream
-- Print disassembly of generated code
-
-- Comment the code
 
 ====================
 
