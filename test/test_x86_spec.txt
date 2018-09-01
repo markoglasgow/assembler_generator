@@ -23,6 +23,9 @@ size: 8
 name: short_opcode
 size: 5
 
+name: full_opcode
+size: 8
+
 name: opcode
 size: 6
 
@@ -69,9 +72,12 @@ INSTRUCTION =
 | %DATA_STATEMENT%
 | %JUMP_IMMEDIATE%
 | %PUSH_INSTRUCTION%
+| %POP_REG%
+| %TINY_INSTRUCTION%
 | %MOV_REG_IMMEDIATE%
+| %OP_8REG_8IMMEDIATE%
 | %OP_32REG_8BITVAL%
-| %CALL_REG%
+| %CALL_INSTRUCTION%
 | %MOV_OPERAND_IMMEDIATE32%
 | %MNEMONIC_2OPS% %TWO_OPERANDS%
 ;
@@ -83,6 +89,9 @@ DATA_STATEMENT =
 ;
 
 JUMP_IMMEDIATE =
+| ja label_x86_rel_32_bit_cond_branch			:: prefix = 0000 1111 :: full_opcode = 1000 0111 :: immediate_32=%label_x86_rel_32_bit_cond_branch%
+| jl label_x86_rel_32_bit_cond_branch			:: prefix = 0000 1111 :: full_opcode = 1000 1100 :: immediate_32=%label_x86_rel_32_bit_cond_branch%
+| jne label_x86_rel_32_bit_cond_branch			:: prefix = 0000 1111 :: full_opcode = 1000 0101 :: immediate_32=%label_x86_rel_32_bit_cond_branch%
 | jmp label_x86_rel_32_bit_branch               :: opcode=1110 10 :: opcode_d=0 :: opcode_s=1 :: immediate_32=%label_x86_rel_32_bit_branch%
 ;
 
@@ -91,8 +100,24 @@ PUSH_INSTRUCTION =
 | push %32_BIT_IMMEDIATE%                       :: opcode=0110 10 :: opcode_d=0 :: opcode_s=0
 ;
 
-CALL_REG =
+POP_REG = 
+| pop %32_BIT_REG%								:: short_opcode=0101 1
+;
+
+TINY_INSTRUCTION = 
+| inc %32_BIT_REG%								:: short_opcode=0100 0
+| ret 											:: full_opcode=1100 0011
+| nop 											:: full_opcode=1001 0000
+;
+
+CALL_INSTRUCTION =
+| call label_x86_rel_32_bit_branch				:: opcode=1110 10 :: opcode_d=0 :: opcode_s=0 :: immediate_32=%label_x86_rel_32_bit_branch%
 | call %32_BIT_REG%								:: prefix = 1111 1111 :: short_opcode = 1101 0
+;
+
+OP_8REG_8IMMEDIATE =
+| cmp %8_BIT_REG%, %8_BIT_IMMEDIATE%			:: prefix = 10000000 :: short_opcode = 11111
+| sub %8_BIT_REG%, %8_BIT_IMMEDIATE%			:: prefix = 10000000 :: short_opcode = 11101
 ;
 
 MOV_REG_IMMEDIATE = 
@@ -106,11 +131,12 @@ MOV_OPERAND_IMMEDIATE32 =
 ;
 
 OP_32REG_8BITVAL = 
-| %MNEMONIC_2OPS_SHORT% %32_BIT_REG_RM%, %8_BIT_IMMEDIATE%				:: opcode_d=1 :: opcode_s=1 :: mod=11
+| %MNEMONIC_2OPS_SHORT% %32_BIT_REG_RM%, %8_BIT_IMMEDIATE%				:: prefix = 1000 0011
 ;
 
 MNEMONIC_2OPS_SHORT =
-| sub                                           :: opcode=1000 00 :: reg=101
+| sub                                           :: short_opcode = 1110 1
+| add                                           :: short_opcode = 1100 0
 ;
 
 MNEMONIC_2OPS =
@@ -139,11 +165,15 @@ TWO_OPERANDS =
 
 8_BIT_REG =
 | al                                            :: reg=000
+| cl                                            :: reg=001
+| dl                                            :: reg=010
 | bl                                            :: reg=011
 ;
 
 8_BIT_REG_RM =
 | al                                            :: rm=000
+| cl                                            :: rm=001
+| dl                                            :: rm=010
 | bl                                            :: rm=011
 ;
 

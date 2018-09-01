@@ -1,6 +1,68 @@
+;push ebp
+;mov ebp, esp
+;sub esp, 8
+;mov dword ptr[esp], 01FAAh
+;mov eax, 01F8Eh
+;call eax
+
 push ebp
-mov ebp, esp
-sub esp, 8
-mov dword ptr[esp], 01FAAh
-mov eax, 01F8Eh
-call eax
+    mov ebp, esp
+   
+    sub esp, 010h
+    mov ebx, esp
+   
+    call _load_data
+   
+    xor ecx, ecx   
+_loop:
+    mov dl, byte ptr[eax]
+    cmp dl, 061h
+    jl _skip_uppercase
+    cmp dl, 07Ah
+    ja _skip_uppercase
+   
+    sub dl, 020h
+   
+_skip_uppercase:
+    mov byte ptr[ebx], dl
+   
+    inc eax
+    inc ecx
+    inc ebx
+   
+    cmp dl, 0
+    jne _loop
+   
+    mov eax, esp
+    push eax
+   
+    mov eax, 00401000h
+    call eax
+   
+    add esp, 014h
+   
+    pop ebp
+    ret
+   
+_load_data:
+    call _close_call
+_close_call:
+    pop eax
+    add eax, 5
+    ret
+   
+_str_hello_world:
+
+db 048h        ; H
+db 065h        ; e
+db 06Ch        ; l
+db 06Ch        ; l
+db 06Fh        ; o
+db 020h
+db 057h        ; W
+db 06Fh        ; o
+db 072h        ; r
+db 06Ch        ; l
+db 064h        ; d
+db 021h        ; !
+db 0
