@@ -83,12 +83,12 @@ DATA_STATEMENT =
 ;
 
 JUMP_IMMEDIATE =
-| jmp label_x86_rel_32_bit_branch               :: opcode=1110 1001 :: immediate_32=%label_x86_rel_32_bit_branch%
+| jmp label_x86_rel_32_bit_branch               :: opcode=1110 10 :: opcode_d=0 :: opcode_s=1 :: immediate_32=%label_x86_rel_32_bit_branch%
 ;
 
 PUSH_INSTRUCTION = 
 | push %32_BIT_REG%								:: short_opcode=0101 0
-| push %32_BIT_IMMEDIATE%                       :: opcode=0110 1000
+| push %32_BIT_IMMEDIATE%                       :: opcode=0110 10 :: opcode_d=0 :: opcode_s=0
 ;
 
 CALL_REG =

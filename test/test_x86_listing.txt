@@ -1,3 +1,4 @@
+push eax
 test_label1: 
 test_label2: mov al, byte ptr[eax]
 xor eax, ebx
