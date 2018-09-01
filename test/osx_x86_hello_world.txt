@@ -8,7 +8,7 @@
 push ebp
     mov ebp, esp
    
-    sub esp, 010h
+    sub esp, 014h
     mov ebx, esp
    
     call _load_data
@@ -36,10 +36,11 @@ _skip_uppercase:
     mov eax, esp
     push eax
    
-    mov eax, 00401000h
+    mov eax, 01F8Eh
     call eax
    
-    add esp, 014h
+    add esp, 018h
+    xor eax, eax
    
     pop ebp
     ret
