@@ -52,6 +52,7 @@ RXX_MNEMONICS =
 
 RX_INSTRUCTION = 
 | %RX_MNEMONICS% %REG_D%,label_sigma16[%REG_A%]         :: displacement=%label_sigma16%
+| %RX_MNEMONICS% %REG_D%,int_sigma16_data[%REG_A%]      :: displacement=%int_sigma16_data%
 | jump label_sigma16[%REG_A%]                           :: op_b=0011 :: op_d=0000 :: displacement=%label_sigma16%
 ;
 
