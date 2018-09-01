@@ -32,10 +32,9 @@ from capstone import *
 ##################################################
 
 IMAGEBASE = 0x1000
-INPUT_EXPECTED_DISASM_LISTING = ""
-TEST_NAME = "test_x86"
+INPUT_EXPECTED_DISASM_LISTING = "test/osx_x86_hello_world_disasm.txt"
 DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
-INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
+INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
 INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
 INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"
 OUTPUT_BIN = "out.exe"
@@ -48,13 +47,13 @@ def check_disassembly(raw_bytes):
 
     disassembly_str += "\n"
 
-    #with open(INPUT_EXPECTED_DISASM_LISTING, "r") as text_file:
-    #    expected_disassembly = text_file.read()
-#
-    #if disassembly_str != expected_disassembly:
-    #    print("ERROR: Expected disassembly in '%s' does not match given disassembly: " % INPUT_EXPECTED_DISASM_LISTING)
-    #    print(disassembly_str)
-    #    raise ValueError
+    with open(INPUT_EXPECTED_DISASM_LISTING, "r") as text_file:
+        expected_disassembly = text_file.read()
+
+    if disassembly_str != expected_disassembly:
+        print("ERROR: Expected disassembly in '%s' does not match given disassembly: " % INPUT_EXPECTED_DISASM_LISTING)
+        print(disassembly_str)
+        raise ValueError
 
     print(disassembly_str)
 

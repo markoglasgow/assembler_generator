@@ -5,7 +5,7 @@
 ;mov eax, 01F8Eh
 ;call eax
 
-push ebp
+    push ebp
     mov ebp, esp
    
     sub esp, 014h
@@ -36,7 +36,7 @@ _skip_uppercase:
     mov eax, esp
     push eax
    
-    mov eax, 01F8Eh
+    mov eax, 01F8Eh         ; address of _puts (printf)
     call eax
    
     add esp, 018h
