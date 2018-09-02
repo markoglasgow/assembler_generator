@@ -19,34 +19,48 @@
 name: cond
 size: 4
 
-name: opcode
+/////////////////////
+name: opcode_ls
 size: 3
 
 name: pre_post
 size: 1
+/////////////////////
 
+name: padding
+size: 2
 
+name: immediate
+size: 1
+
+name: post_index
+size: 1
+
+name: opcode
+size: 4
+
+name: set_condition
+size: 1
 
 /////////////////////
 name: uswl
 size: 4
 /////////////////////
-name: up_down
-size: 1
 
-name: psr_force
-size: 1
+/////////////////////
 
-name: write_back
-size: 1
+name: op1_register
+size: 4
 
-name: load_store
-size: 1
+name: dest_register
+size: 4
+
 /////////////////////
 
 name: base_register
 size: 4
 
+/////////////////////
 name: reglist_15
 size: 1
 
@@ -94,40 +108,82 @@ size: 1
 
 name: reglist_0
 size: 1
+/////////////////////
+
+name: operand2_imm
+size: 12
 
 
 ////////////////////////////////////////
 .ASM_INSTRUCTIONS
 
 INSTRUCTION = 
-| %MNEMONIC_2OPS% %REGISTER%, %Operand2%
-| %MNEMONIC_3OPS% %REGISTER%, %REGISTER%, %Operand2%
-| %PUSH_INSTRUCTION%												:: reglist_0=0 :: reglist_1=0 :: reglist_2=0 :: reglist_3=0 :: reglist_4=0 :: reglist_5=0 :: reglist_6=0 :: reglist_7=0 :: reglist_8=0 :: reglist_9=0 :: reglist_10=0 :: reglist_11=0 :: reglist_12=0 :: reglist_13=0 :: reglist_14=0 :: reglist_15=0 :: cond=1110 :: opcode=100  :: pre_post=1 :: uswl=0010 :: base_register=1101 
+| %PUSH_INSTRUCTION%												:: reglist_0=0 :: reglist_1=0 :: reglist_2=0 :: reglist_3=0 :: reglist_4=0 :: reglist_5=0 :: reglist_6=0 :: reglist_7=0 :: reglist_8=0 :: reglist_9=0 :: reglist_10=0 :: reglist_11=0 :: reglist_12=0 :: reglist_13=0 :: reglist_14=0 :: reglist_15=0 :: cond=1110 :: opcode_ls=100  :: pre_post=1 :: uswl=0010 :: base_register=1101 
+| %DATA_PROCESSING%													:: cond=1110 :: padding=00 :: set_condition=0
+| %LOAD_STORE%														:: cond=1110 :: padding=01
+;
+
+LOAD_STORE =
+| %LOAD_STORE_OPS% %DEST_REGISTER%, [%OP1_REGISTER%, %IMMEDIATE_OFFSET%]		:: immediate=0
+;
+
+LOAD_STORE_OPS =
+| str 																:: post_index=1 :: uswl=0000
+| ldr 																:: post_index=1 :: uswl=0001
+;
+
+DATA_PROCESSING = 
+| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %IMMEDIATE%		:: immediate=1
+;
+
+DATA_PROCESSING_MNEMONICS =
+| add 					:: opcode=0100
+| sub 					:: opcode=0010
+;
+
+DEST_REGISTER =
+| r0   			:: dest_register=0000
+| r2 			:: dest_register=0010
+| r3 			:: dest_register=0011
+| r4 			:: dest_register=0100
+| r5 			:: dest_register=0101
+| r6 			:: dest_register=0110
+| r7 			:: dest_register=0111
+| r8 			:: dest_register=1000
+| r9  			:: dest_register=1001
+| r10 			:: dest_register=1010
+| r11 			:: dest_register=1011
+| fp 			:: dest_register=1011
+| r12 			:: dest_register=1100
+| sp  			:: dest_register=1101
+| lr  			:: dest_register=1110
+| pc  			:: dest_register=1111
+| r1  			:: dest_register=0001
+;
+
+OP1_REGISTER =
+| r0   			:: op1_register=0000
+| r2 			:: op1_register=0010
+| r3 			:: op1_register=0011
+| r4 			:: op1_register=0100
+| r5 			:: op1_register=0101
+| r6 			:: op1_register=0110
+| r7 			:: op1_register=0111
+| r8 			:: op1_register=1000
+| r9  			:: op1_register=1001
+| r10 			:: op1_register=1010
+| r11 			:: op1_register=1011
+| fp 			:: op1_register=1011
+| r12 			:: op1_register=1100
+| sp  			:: op1_register=1101
+| lr  			:: op1_register=1110
+| pc  			:: op1_register=1111
+| r1  			:: op1_register=0001
 ;
 
 PUSH_INSTRUCTION = 
 | push {%REGISTER0%}
 | push {%REGISTER0%, %REGISTER1%}
-;
-
-MNEMONIC_2OPS = 
-| mov%CONDITIONAL%
-| mov
-;
-
-MNEMONIC_3OPS = 
-| eor%CONDITIONAL%
-| eor
-;
-
-CONDITIONAL = 
-| ge
-| le
-;
-
-REGISTER = 
-| r0
-| r1
 ;
 
 REGISTER0 = 
@@ -170,24 +226,13 @@ REGISTER1 =
 | r1  			:: reglist_1=1
 ;
 
-Operand2 = 
-| %REGISTER%, %SHIFTER%
-| %REGISTER%
-| %IMMEDIATE%
-;
-
-SHIFTER = 
-| lsl %REGISTER_OR_IMMEDIATE_SMALL%
-| lsr %REGISTER_OR_IMMEDIATE_SMALL%
-| rrx
-;
-
-REGISTER_OR_IMMEDIATE_SMALL =
-| %REGISTER%
-;
-
 IMMEDIATE = 
+| int_8_bits_absolute						:: operand2_imm=%int_8_bits_absolute%
 | int_12_bits_constrained
+;
+
+IMMEDIATE_OFFSET =
+| int_12_bits_offset						:: operand2_imm=%int_12_bits_offset%
 ;
 
 

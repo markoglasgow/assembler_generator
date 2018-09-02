@@ -10,3 +10,8 @@
 ;   10308:       90909090        .word   0x90909090
 
 push    {fp, lr}
+add     fp, sp, #4
+sub     sp, sp, #8
+str     r0, [fp, #-8]
+str     r1, [fp, #-12]
+ldr     r3, [pc, #1048]
