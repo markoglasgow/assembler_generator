@@ -41,12 +41,22 @@ from capstone import *
 
 ##################################################
 
-IMAGEBASE = 0x08048310
-INPUT_EXPECTED_DISASM_LISTING = "test/linux_x86_hello_world_disasm.txt"
+#IMAGEBASE = 0x08048310
+#INPUT_EXPECTED_DISASM_LISTING = "test/linux_x86_hello_world_disasm.txt"
+#DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
+#INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
+#INPUT_ASM_LISTING = "test/linux_x86_hello_world.txt"
+#INPUT_BIN_TEMPLATE = "bin_templates/linux/x86/HelloWorld32"
+#OUTPUT_BIN = "out.exe"
+
+##################################################
+
+IMAGEBASE = 0x00401000
+INPUT_EXPECTED_DISASM_LISTING = "test/windows_x86_hello_world_disasm.txt"
 DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
-INPUT_ASM_LISTING = "test/linux_x86_hello_world.txt"
-INPUT_BIN_TEMPLATE = "bin_templates/linux/x86/HelloWorld32"
+INPUT_ASM_LISTING = "test/windows_x86_hello_world.txt"
+INPUT_BIN_TEMPLATE = "bin_templates/windows/x86/HelloWorld32"
 OUTPUT_BIN = "out.exe"
 
 
