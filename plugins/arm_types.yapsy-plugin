@@ -1,0 +1,9 @@
+[Core]
+Name = ARM Types
+Module = arm_types
+
+[Documentation]
+Author = Marko Caklovic
+Version = 1.0
+Website = https://github.com/markoglasgow
+Description = Plugin for parsing and emitting ARM int types for the Generic Assembler Generator

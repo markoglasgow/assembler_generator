@@ -16,8 +16,85 @@
 ////////////////////////////////////////
 .BIT_FIELDS
 
-name: junk
+name: cond
+size: 4
+
+name: opcode
+size: 3
+
+name: pre_post
 size: 1
+
+
+
+/////////////////////
+name: uswl
+size: 4
+/////////////////////
+name: up_down
+size: 1
+
+name: psr_force
+size: 1
+
+name: write_back
+size: 1
+
+name: load_store
+size: 1
+/////////////////////
+
+name: base_register
+size: 4
+
+name: reglist_15
+size: 1
+
+name: reglist_14
+size: 1
+
+name: reglist_13
+size: 1
+
+name: reglist_12
+size: 1
+
+name: reglist_11
+size: 1
+
+name: reglist_10
+size: 1
+
+name: reglist_9
+size: 1
+
+name: reglist_8
+size: 1
+
+name: reglist_7
+size: 1
+
+name: reglist_6
+size: 1
+
+name: reglist_5
+size: 1
+
+name: reglist_4
+size: 1
+
+name: reglist_3
+size: 1
+
+name: reglist_2
+size: 1
+
+name: reglist_1
+size: 1
+
+name: reglist_0
+size: 1
+
 
 ////////////////////////////////////////
 .ASM_INSTRUCTIONS
@@ -25,6 +102,12 @@ size: 1
 INSTRUCTION = 
 | %MNEMONIC_2OPS% %REGISTER%, %Operand2%
 | %MNEMONIC_3OPS% %REGISTER%, %REGISTER%, %Operand2%
+| %PUSH_INSTRUCTION%												:: reglist_0=0 :: reglist_1=0 :: reglist_2=0 :: reglist_3=0 :: reglist_4=0 :: reglist_5=0 :: reglist_6=0 :: reglist_7=0 :: reglist_8=0 :: reglist_9=0 :: reglist_10=0 :: reglist_11=0 :: reglist_12=0 :: reglist_13=0 :: reglist_14=0 :: reglist_15=0 :: cond=1110 :: opcode=100  :: pre_post=1 :: uswl=0010 :: base_register=1101 
+;
+
+PUSH_INSTRUCTION = 
+| push {%REGISTER0%}
+| push {%REGISTER0%, %REGISTER1%}
 ;
 
 MNEMONIC_2OPS = 
@@ -47,6 +130,46 @@ REGISTER =
 | r1
 ;
 
+REGISTER0 = 
+| r0   			:: reglist_0=1	
+| r2 			:: reglist_2=1
+| r3 			:: reglist_3=1
+| r4 			:: reglist_4=1
+| r5 			:: reglist_5=1
+| r6 			:: reglist_6=1
+| r7 			:: reglist_7=1
+| r8 			:: reglist_8=1
+| r9  			:: reglist_9=1
+| r10 			:: reglist_10=1
+| r11 			:: reglist_11=1
+| fp 			:: reglist_11=1
+| r12 			:: reglist_12=1
+| sp  			:: reglist_13=1
+| lr  			:: reglist_14=1
+| pc  			:: reglist_15=1
+| r1  			:: reglist_1=1
+;
+
+REGISTER1 = 
+| r0   			:: reglist_0=1	
+| r2 			:: reglist_2=1
+| r3 			:: reglist_3=1
+| r4 			:: reglist_4=1
+| r5 			:: reglist_5=1
+| r6 			:: reglist_6=1
+| r7 			:: reglist_7=1
+| r8 			:: reglist_8=1
+| r9  			:: reglist_9=1
+| r10 			:: reglist_10=1
+| r11 			:: reglist_11=1
+| fp 			:: reglist_11=1
+| r12 			:: reglist_12=1
+| sp  			:: reglist_13=1
+| lr  			:: reglist_14=1
+| pc  			:: reglist_15=1
+| r1  			:: reglist_1=1
+;
+
 Operand2 = 
 | %REGISTER%, %SHIFTER%
 | %REGISTER%
@@ -61,15 +184,10 @@ SHIFTER =
 
 REGISTER_OR_IMMEDIATE_SMALL =
 | %REGISTER%
-| %IMMEDIATE_SMALL% 
 ;
 
 IMMEDIATE = 
 | int_12_bits_constrained
-;
-
-IMMEDIATE_SMALL = 
-| int_4_bits
 ;
 
 
