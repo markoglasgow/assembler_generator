@@ -5,7 +5,10 @@ from ast_utils import pretty_print_ast
 from asm_int_types import AsmIntTypes
 from obj_writer import ObjectWriter
 
-from capstone import *
+ENABLE_DISASSEMBLER = False
+
+if ENABLE_DISASSEMBLER:
+    from capstone import *
 
 #TEST_NAME = "sigma16"
 #INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
@@ -19,10 +22,9 @@ from capstone import *
 
 #IMAGEBASE = 0x1000
 #TEST_NAME = "test_x86"
-#DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
+#
 
 # TEST_NAME = "test_ARM"
-# DISASSEMBLER = Cs(CS_ARCH_ARM, CS_MODE_ARM)
 
 #INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
 #
@@ -33,7 +35,6 @@ from capstone import *
 
 #IMAGEBASE = 0x1000
 #INPUT_EXPECTED_DISASM_LISTING = "test/osx_x86_hello_world_disasm.txt"
-#DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 #INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
 #INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
 #INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"
@@ -53,7 +54,6 @@ from capstone import *
 
 IMAGEBASE = 0x00401000
 INPUT_EXPECTED_DISASM_LISTING = "test/windows_x86_hello_world_disasm.txt"
-DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
 INPUT_ASM_LISTING = "test/windows_x86_hello_world.txt"
 INPUT_BIN_TEMPLATE = "bin_templates/windows/x86/HelloWorld32"
@@ -61,8 +61,12 @@ OUTPUT_BIN = "out.exe"
 
 
 def check_disassembly(raw_bytes):
+
+    disassembler = Cs(CS_ARCH_X86, CS_MODE_32)
+    # disassembler = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+
     disassembly_str = ""
-    for (address, size, mnemonic, op_str) in DISASSEMBLER.disasm_lite(raw_bytes, 0x1000):
+    for (address, size, mnemonic, op_str) in disassembler.disasm_lite(raw_bytes, 0x1000):
         disassembly_str += "0x%x:\t%s\t%s\n" % (address, mnemonic, op_str)
 
     disassembly_str += "\n"
@@ -88,7 +92,6 @@ def main():
     asm_grammar.read_spec(INPUT_ASM_GRAMMAR_SPEC)
     print("Read ASM grammar spec ok")
 
-    # asm_parser = AsmParser(asm_grammar)
     asm_parser = AsmParser(asm_grammar, sigma16_labels=False)
     asm_parser.parse_asm_listing(INPUT_ASM_LISTING)
     print("Parsed ASM listing ok")
