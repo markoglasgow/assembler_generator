@@ -1,6 +1,5 @@
-- implement hello world program in x86 and ARM. Spec out these arches until you have enough to write the program
-- emit MachO or ELF files of assembled programs. 
-- make a Xubuntu VM with all dependencies. Install QEMU and get ARM hello world program running on it.
+- implement hello world program in ARM. 
+- On Xubuntu: Install QEMU and get ARM hello world program running on it.
 - Make documentation
 - Make a tutorial walkthrough
 
@@ -12,11 +11,15 @@
 - Verbose print bitstream
 - Print disassembly of generated code
 - Compare disassembly to expected disassembly
+- imagebase
+- sigma16 labels
+- disassembler-arch
 
 - Comment the code
 
 - Testing system?
 
+------
 - optional whitespaces?
 - doesn't handle optional whitespace after commas ',' correctly
 

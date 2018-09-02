@@ -7,6 +7,12 @@ class ObjectWriter:
         self.raw_bytes = raw_bytes
         return
 
+    def write_bin(self, output_file):
+        with open(output_file, "wb+") as out_file:
+            out_file.write(self.raw_bytes)
+
+        return
+
     def write_sigma16_data(self, output_file):
 
         if len(self.raw_bytes) % 2 != 0:
