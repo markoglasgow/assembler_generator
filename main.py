@@ -44,7 +44,6 @@ if ENABLE_DISASSEMBLER:
 
 #IMAGEBASE = 0x08048310
 #INPUT_EXPECTED_DISASM_LISTING = "test/linux_x86_hello_world_disasm.txt"
-#DISASSEMBLER = Cs(CS_ARCH_X86, CS_MODE_32)
 #INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
 #INPUT_ASM_LISTING = "test/linux_x86_hello_world.txt"
 #INPUT_BIN_TEMPLATE = "bin_templates/linux/x86/HelloWorld32"
@@ -62,24 +61,25 @@ OUTPUT_BIN = "out.exe"
 
 def check_disassembly(raw_bytes):
 
-    disassembler = Cs(CS_ARCH_X86, CS_MODE_32)
-    # disassembler = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+    if ENABLE_DISASSEMBLER:
+        disassembler = Cs(CS_ARCH_X86, CS_MODE_32)
+        # disassembler = Cs(CS_ARCH_ARM, CS_MODE_ARM)
 
-    disassembly_str = ""
-    for (address, size, mnemonic, op_str) in disassembler.disasm_lite(raw_bytes, 0x1000):
-        disassembly_str += "0x%x:\t%s\t%s\n" % (address, mnemonic, op_str)
+        disassembly_str = ""
+        for (address, size, mnemonic, op_str) in disassembler.disasm_lite(raw_bytes, 0x1000):
+            disassembly_str += "0x%x:\t%s\t%s\n" % (address, mnemonic, op_str)
 
-    disassembly_str += "\n"
+        disassembly_str += "\n"
 
-    with open(INPUT_EXPECTED_DISASM_LISTING, "r") as text_file:
-        expected_disassembly = text_file.read()
+        with open(INPUT_EXPECTED_DISASM_LISTING, "r") as text_file:
+            expected_disassembly = text_file.read()
 
-    if disassembly_str != expected_disassembly:
-        print("ERROR: Expected disassembly in '%s' does not match given disassembly: " % INPUT_EXPECTED_DISASM_LISTING)
+        if disassembly_str != expected_disassembly:
+            print("ERROR: Expected disassembly in '%s' does not match given disassembly: " % INPUT_EXPECTED_DISASM_LISTING)
+            print(disassembly_str)
+            raise ValueError
+
         print(disassembly_str)
-        raise ValueError
-
-    print(disassembly_str)
 
     return
 
