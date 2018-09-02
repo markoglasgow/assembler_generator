@@ -1,4 +1,5 @@
 env/*
+*.out
 *.exe
 *.id0
 *.id1

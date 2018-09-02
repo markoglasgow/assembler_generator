@@ -11,54 +11,6 @@ ENABLE_DISASSEMBLER = True
 if ENABLE_DISASSEMBLER:
     from capstone import *
 
-#TEST_NAME = "sigma16"
-#INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
-#IMAGEBASE = 0
-#DISASSEMBLER = None
-#INPUT_EXPECTED_DISASM_LISTING = ""
-#INPUT_ASM_LISTING = "test/sigma16_Write.asm.txt"
-#INPUT_ASM_LISTING = "test/sigma16_Add.asm.txt"
-
-##################################################
-
-#IMAGEBASE = 0x1000
-#TEST_NAME = "test_x86"
-#
-
-# TEST_NAME = "test_ARM"
-
-#INPUT_ASM_GRAMMAR_SPEC = "test/%s_spec.txt" % TEST_NAME
-#
-#INPUT_ASM_LISTING = "test/%s_listing.txt" % TEST_NAME
-#INPUT_EXPECTED_DISASM_LISTING = "test/%s_disasm.txt" % TEST_NAME
-
-##################################################
-
-#IMAGEBASE = 0x1000
-#INPUT_EXPECTED_DISASM_LISTING = "test/osx_x86_hello_world_disasm.txt"
-#INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
-#INPUT_ASM_LISTING = "test/osx_x86_hello_world.txt"
-#INPUT_BIN_TEMPLATE = "bin_templates/osx/x86/HelloWorld32"
-#OUTPUT_BIN = "out.exe"
-
-##################################################
-
-#IMAGEBASE = 0x08048310
-#INPUT_EXPECTED_DISASM_LISTING = "test/linux_x86_hello_world_disasm.txt"
-#INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
-#INPUT_ASM_LISTING = "test/linux_x86_hello_world.txt"
-#INPUT_BIN_TEMPLATE = "bin_templates/linux/x86/HelloWorld32"
-#OUTPUT_BIN = "out.exe"
-
-##################################################
-
-# IMAGEBASE = 0x00401000
-# INPUT_EXPECTED_DISASM_LISTING = "test/windows_x86_hello_world_disasm.txt"
-# INPUT_ASM_GRAMMAR_SPEC = "test/test_x86_spec.txt"
-# INPUT_ASM_LISTING = "test/windows_x86_hello_world.txt"
-# INPUT_BIN_TEMPLATE = "bin_templates/windows/x86/HelloWorld32"
-# OUTPUT_BIN = "out.exe"
-
 
 def check_disassembly(raw_bytes, opts):
 
