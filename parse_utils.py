@@ -1,5 +1,7 @@
 from typing import Tuple
 
+# Static class containing helper methods useful for parsing.
+
 
 class ParseUtils:
 
@@ -13,6 +15,9 @@ class ParseUtils:
     for c in valid_number_chars:
         valid_number_chars_map[c] = True
 
+    # Reads a token until certain break characters are reached, or until characters read are not valid token characters.
+    # Reading starts at a certain position in the given string.
+    # Returns the token read, along with an updated position inside the string.
     @staticmethod
     def read_token(input_string, start_pos=0, break_chars=None, valid_chars=None) -> Tuple[str, int]:
 
@@ -38,14 +43,19 @@ class ParseUtils:
 
         return token, current_pos
 
+    # Read an alphanumeric identifier from a string at a certain position. Return the identifier and the updated position
+    # in the string after the reading is done.
     @staticmethod
     def read_identifier(input_string, start_pos=0) -> Tuple[str, int]:
         return ParseUtils.read_token(input_string, start_pos, break_chars=[' ', '\t'], valid_chars=ParseUtils.valid_identifier_chars_map)
 
+    # Read a decimal number at a certain position in a string. Return the identifier and the updated position in the string after
+    # the reading is done.
     @staticmethod
     def read_number(input_string, start_pos=0) -> Tuple[str, int]:
         return ParseUtils.read_token(input_string, start_pos, break_chars=[' ', '\t'], valid_chars=ParseUtils.valid_number_chars_map)
 
+    # Helper method to skip whitespaces at a certain point in a string, and returns updated position after the whitespaces
     @staticmethod
     def skip_whitespace(input_string, start_pos=0):
 
@@ -55,6 +65,7 @@ class ParseUtils:
 
         return pos
 
+    # Read next char in string at given position, return None if we hit eol.
     @staticmethod
     def read_next_char(input_string, start_pos=0) -> str:
         c = None
@@ -62,6 +73,7 @@ class ParseUtils:
             c = input_string[start_pos]
         return c
 
+    # Checks if the rest of a string is empty past a certain position.
     @staticmethod
     def is_rest_empty(input_string, start_pos=0):
 

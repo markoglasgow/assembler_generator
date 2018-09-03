@@ -1,5 +1,11 @@
 import os.path
 
+# Helper module for outputting the bitstream in various formats, or to embed it inside an object template. The object
+# templates are located in bin_templates. Each template has a code cave of NOPs into which machine code can be injected.
+# There is a .info file which must be present next to each template object file. The first line of the .info file
+# contains the offset into which machine code should be injected. The second line contains the size of the code cave.
+# Machine code blobs larger than the size should not be injected.
+
 
 class ObjectWriter:
 
@@ -7,12 +13,14 @@ class ObjectWriter:
         self.raw_bytes = raw_bytes
         return
 
+    # Write the raw binary blob to a file.
     def write_bin(self, output_file):
         with open(output_file, "wb+") as out_file:
             out_file.write(self.raw_bytes)
 
         return
 
+    # Write the machine code as textual Sigma16 data, which can be loaded and executed in a Sigma16 simulator.
     def write_sigma16_data(self, output_file):
 
         if len(self.raw_bytes) % 2 != 0:
@@ -34,6 +42,8 @@ class ObjectWriter:
 
         return
 
+    # Write machine code into a template object file which gives the user an executable binary they can run to test their
+    # assembled code. Template files are located in bin_templates folder, and have a .info file next to them.
     def write_object(self, template_file, output_file):
 
         if not os.path.isfile(template_file):
@@ -61,6 +71,9 @@ class ObjectWriter:
 
         return
 
+    # Reads .info file of an object template file. First line will specify offset of code cave where assembled machine
+    # code should be injected, second line will specify size of code cave. Size of machine code should not exceed size
+    # of code cave.
     def read_template_info(self, info_file_path):
         with open(info_file_path, "r") as info_file:
             lines = info_file.readlines()
@@ -91,6 +104,7 @@ class ObjectWriter:
 
         return offset, size
 
+    # Overwrite bytes in a buffer at a certain offset with new_bytes.
     def overwrite_bytes(self, original_buffer, new_bytes, offset):
 
         bin_size = len(new_bytes)
