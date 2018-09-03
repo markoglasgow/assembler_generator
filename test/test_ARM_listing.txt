@@ -1,13 +1,3 @@
-;   102e4:       e92d4800        push    {fp, lr}
-;   102e8:       e28db004        add     fp, sp, #4
-;   102ec:       e24dd008        sub     sp, sp, #8
-;   102f0:       e50b0008        str     r0, [fp, #-8]
-;   102f4:       e50b100c        str     r1, [fp, #-12]
-;   102f8:       e59f3418        ldr     r3, [pc, #1048] ; 10718 <main+0x434>
-;   102fc:       e08f3003        add     r3, pc, r3
-;   10300:       e1a00003        mov     r0, r3
-;   10304:       fa0013f6        blx     152e4 <_IO_puts>
-;   10308:       90909090        .word   0x90909090
 
 push    {fp, lr}
 add     fp, sp, #4
@@ -17,5 +7,3 @@ str     r1, [fp, #-12]
 ldr     r3, [pc, #1048]
 add     r3, pc, r3
 mov     r0, r3
-mov     r8, #740
-add     r8, r8, #86016

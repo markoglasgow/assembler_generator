@@ -1,0 +1,9 @@
+0x1000:	push	{fp, lr}
+0x1004:	add	fp, sp, #4
+0x1008:	sub	sp, sp, #8
+0x100c:	str	r0, [fp, #-8]
+0x1010:	str	r1, [fp, #-0xc]
+0x1014:	ldr	r3, [pc, #0x418]
+0x1018:	add	r3, pc, r3
+0x101c:	lsr	r0, r0, r0
+
