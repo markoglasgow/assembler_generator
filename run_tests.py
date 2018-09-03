@@ -1,5 +1,12 @@
 import os
 
+# This file is a test runner which functions by running the main script and checking the exit code to make sure nothing
+# went wrong. It runs tests to assemble different code snippets for the x86, ARM, and Sigma16 architectures, and checks
+# the assembled code against an expected disassembly listing where possible.
+
+# Note that disassembly is done with Capstone. Make sure that Capstone is uncommented in requirements.txt, and that
+# ENABLE_DISASSEMBLER is set to True in main.py to enable Capstone.
+
 
 def main():
 

@@ -3,6 +3,9 @@ from bitstring import BitArray
 
 from typing import Optional
 
+# This plugin has some builtin convenience types for any architecture, as well as x86 relative and absolute labels.
+# The plugin is meant to act as a reference for future plugins.
+
 
 class BuiltinTypes(IPlugin):
 

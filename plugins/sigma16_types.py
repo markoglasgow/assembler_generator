@@ -3,6 +3,8 @@ from bitstring import BitArray
 
 from typing import Optional
 
+# This plugin implements the data and label types for the Sigma16 architecture.
+
 
 class Sigma16Types(IPlugin):
 

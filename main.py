@@ -6,12 +6,18 @@ from asm_int_types import AsmIntTypes
 from obj_writer import ObjectWriter
 from optparse import OptionParser
 
+# This module is the main entrypoint of the program, responsible for handling command line flags and orchestrating
+# different pieces of the assembler pipeline.
+
+# Set this flag to True to enable Capstone integration and disassembly support. The Capstone disassembler is used to
+# check the assembled machine code, to make sure that it matches the expected output.
 ENABLE_DISASSEMBLER = True
 
 if ENABLE_DISASSEMBLER:
     from capstone import *
 
 
+# This function is responsible for disassembling the assembled machine code and checking it against expected output.
 def check_disassembly(raw_bytes, opts):
 
     if ENABLE_DISASSEMBLER and (opts.print_disasm or opts.disasm_path):
@@ -40,6 +46,7 @@ def check_disassembly(raw_bytes, opts):
     return
 
 
+# This function is responsible for setting up and checking the command line arguments.
 def load_args():
 
     parser = OptionParser()
@@ -137,6 +144,8 @@ def load_args():
     return opts
 
 
+# Main entrypoint of the program, responsible for calling all the other modules of the program depending on the
+# commandline parameters.
 def main():
 
     opts = load_args()

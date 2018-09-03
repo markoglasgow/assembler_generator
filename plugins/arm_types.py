@@ -3,6 +3,8 @@ from bitstring import BitArray
 
 from typing import Optional
 
+# This plugin implement the different ARM immediate encodings.
+
 
 class ARMTypes(IPlugin):
 

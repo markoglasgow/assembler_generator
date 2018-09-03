@@ -1,5 +1,3 @@
-- implement hello world program in ARM. 
-- On Xubuntu: Install QEMU and get ARM hello world program running on it.
 - Make documentation
 - Make a tutorial walkthrough
 
