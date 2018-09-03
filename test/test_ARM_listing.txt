@@ -15,3 +15,4 @@ sub     sp, sp, #8
 str     r0, [fp, #-8]
 str     r1, [fp, #-12]
 ldr     r3, [pc, #1048]
+add     r3, pc, r3
