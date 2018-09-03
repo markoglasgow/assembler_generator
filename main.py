@@ -17,7 +17,7 @@ def check_disassembly(raw_bytes, opts):
     if ENABLE_DISASSEMBLER and (opts.print_disasm or opts.disasm_path):
         disassembler = Cs(CS_ARCH_X86, CS_MODE_32)
         if opts.disasm_arch == "arm":
-            disassembler = Cs(CS_ARCH_ARM, CS_MODE_ARM)
+            disassembler = Cs(CS_ARCH_ARM, CS_MODE_ARM + CS_MODE_BIG_ENDIAN)
 
         disassembly_str = ""
         for (address, size, mnemonic, op_str) in disassembler.disasm_lite(raw_bytes, opts.imagebase):

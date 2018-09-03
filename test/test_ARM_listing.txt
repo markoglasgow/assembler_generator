@@ -16,3 +16,6 @@ str     r0, [fp, #-8]
 str     r1, [fp, #-12]
 ldr     r3, [pc, #1048]
 add     r3, pc, r3
+mov     r0, r3
+mov     r8, #740
+add     r8, r8, #86016

@@ -123,8 +123,11 @@ LOAD_STORE_OPS =
 ;
 
 DATA_PROCESSING = 
-| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %IMMEDIATE%			:: immediate=1
-| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %OP2_REGISTER%		:: immediate=0
+| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %IMMEDIATE%						:: immediate=1
+| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %IMMEDIATE_CONSTRAINED%			:: immediate=1
+| %DATA_PROCESSING_MNEMONICS% %DEST_REGISTER%, %OP1_REGISTER%, %OP2_REGISTER%					:: immediate=0
+| mov %DEST_REGISTER%, %OP2_REGISTER%															:: immediate=0 :: opcode=1101
+| mov %DEST_REGISTER%, %IMMEDIATE_CONSTRAINED%													:: immediate=1 :: opcode=1101
 ;
 
 DATA_PROCESSING_MNEMONICS =
@@ -239,7 +242,10 @@ REGISTER1 =
 
 IMMEDIATE = 
 | int_8_bits_absolute						:: operand2_imm=%int_8_bits_absolute%
-| int_12_bits_constrained
+;
+
+IMMEDIATE_CONSTRAINED = 
+| int_12_bits_constrained					:: operand2_imm=%int_12_bits_constrained%
 ;
 
 IMMEDIATE_OFFSET =

@@ -29,13 +29,11 @@ class ARMTypes(IPlugin):
         return self.valid_chars_map
 
     def verify_int_12_bits_constrained(self, int_string):
-        parsed_int = self.parse_int(int_string)
-        if parsed_int is None:
+        b = self.emit_int_12_bits_constrained(int_string)
+        if b is None:
             return False
-        elif -32768 <= parsed_int <= 65535:
-            return True
-        else:
-            return False
+
+        return True
 
     def chars_int_8_bits_absolute(self):
         return self.valid_chars_map
@@ -54,7 +52,8 @@ class ARMTypes(IPlugin):
 
     def verify_int_12_bits_offset(self, int_string):
         parsed_int = self.parse_int(int_string)
-        parsed_int = parsed_int * -1
+        if parsed_int < 0:
+            parsed_int = parsed_int * -1
         if parsed_int is None:
             return False
         elif -2048 <= parsed_int <= 4095:
@@ -73,11 +72,56 @@ class ARMTypes(IPlugin):
 
     def emit_int_12_bits_constrained(self, int_string):
         parsed_int = self.parse_int(int_string)
-        if parsed_int < 32768:
-            b = BitArray(int=parsed_int, length=16)
-        else:
-            b = BitArray(uint=parsed_int, length=16)
-        return b.bin
+        if parsed_int is None:
+            return None
+        b = BitArray(int=parsed_int, length=32)
+        bits = str(b.bin)
+
+        base = None
+        rotation = None
+        for i in range(0, 16):
+
+            has_bits_outside_window = False
+            bits_outside_window = bits
+            # noinspection PyUnusedLocal
+            bits_in_window = []
+
+            window_start = i * 2
+            window_end = window_start + 8
+            if window_end >= len(bits):
+                window_end = window_end - len(bits)
+
+                bits_in_window = bits[window_start:len(bits)] + bits[0:window_end]
+
+                bits_outside_window = bits_outside_window[window_end:window_start]
+            else:
+                bits_in_window = bits[window_start:window_end]
+                bits_outside_window = bits_outside_window[0:window_start] + bits_outside_window[window_end:len(bits_outside_window)]
+
+            for bit in bits_outside_window:
+                if bit == '1':
+                    has_bits_outside_window = True
+                    break
+
+            if not has_bits_outside_window:
+                base = bits_in_window
+
+                if window_end > window_start:
+                    rotation = 4 + i
+                else:
+                    rotation = (window_end / 2)
+
+                break
+
+        if base is None or rotation is None:
+            return None
+
+        base_bits = BitArray('0b' + base)
+        rotation_bits = BitArray(uint=rotation, length=4)
+
+        rotation_bits.append(base_bits)
+
+        return rotation_bits.bin
 
     def emit_int_8_bits_absolute(self, int_string):
         parsed_int = self.parse_int(int_string)
