@@ -5,6 +5,8 @@ from typing import List
 print_buffer = []
 bitfield_modifiers_column = 16
 
+# Helper module for pretty printing the AST for debugging purposes.
+
 
 def pretty_print_ast(ast: List[ASTNode], indentation=0):
 
