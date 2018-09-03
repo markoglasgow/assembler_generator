@@ -5,12 +5,35 @@ from enum import Enum
 from typing import List, Dict
 
 
+# This module is responsible for parsing the input assembly source code. It takes as input the AsmGrammarSpec (the
+# information from the parsed spec file) and the assembly source code, and as output it produces an AST).
+
+# This enum describes the different types of matches that the token matcher can produce.
+# NO_MATCH - no match was made at all
+# PARTIAL_MATCH - tokens in token buffer so far partially match expected tokens. Keep parsing
+# EXACT_MATCH - tokens in token buffer exactly match expected tokens.
 class TokenMatchType(Enum):
     NO_MATCH = 0
     PARTIAL_MATCH = 1
     EXACT_MATCH = 2
 
 
+# This object is the building block of the AST, which is the ultimate output of this module. Each line of the parsed
+# assembly code will be translated to a root ASTNode of type INSTRUCTION. In turn, each of these INSTRUCTION nodes will
+# have child_node which describe the parsed instruction. Those child nodes in turn may have children etc...
+#
+# token_type - type of parsed token, corresponds to asm_grammar_spec.TokenTypes
+# token_value - value of token, depends on what type of token it is. Usually used to identify the token, or describe
+#               what was parsed to produce this ASTNode
+# original_line - raw contents of original line that was parsed to produce this node. Only present if a node is an
+#                   INSTRUCTION node. Is useful for debugging
+# original_line_num - original line number of the instruction parsed to produce this ASTNode. Only present if a node
+#                       is an INSTRUCTION node. Useful for debugging and printing error messages.
+# labels            - list of labels associated with this ASTNode.
+# node_bitfields    - bitfield modifiers associated with this node. These bitfield modifiers typically come from the
+#                       token pattern which was matched by the parsed to produce this ASTNode
+# address           - pseudo-memory-address of the node in the assembled bitstream. Essential for correctly computing
+#                       relative offsets and memory references of labels during bitstream generation.
 class ASTNode:
 
     def __init__(self, token_type=None, token_value=None, child_nodes=None, bitfield_modifiers=None):
@@ -47,6 +70,34 @@ class ASTNode:
         return
 
 
+# Singleton object responsible for parsing the input assembly source code
+# spec - AsmGrammarSpec object describing the architecture that will be parsed
+# sigma16_labels - Sigma16 labels are a bit different than regular labels in other assembler languages, and should be
+#                    parsed in a special way. This flag will enable that special parsing.
+#
+# Object fields
+# spec          - reference to AsmGrammarSpec object describing the architecture
+# ast           - output of this module. Is a list of ASTNodes. Each ASTNode in the list is an INSTRUCTION node which
+#                   corresponds to a line of parsed assembly code. It in turns have child nodes which describe the
+#                   parsed line of assembly code.
+# labels_map    - dictionary which allows us to look up if a label is on a line of code
+# all_labels    - keeps track of all parsed labels and their line. Can look up label by name
+# input_file    - lines of the input assembly source code.
+# line_num      - number of current line being parsed in the assembly source code
+# line          - contents of the current assembly line being parsed
+# line_pos      - position of the parser at the current line that is being parsed
+# token_buffer  - special buffer into which the line's characters are read in one-by-one, and then the parser attempts
+#                   to match the characters in this buffer against different expected token patterns.
+# max_parsed_depth - this is for parser error handling. Keeps track of the max depth of the expected stack when parsing
+#                       the current line of code
+# error_parsed_buffer   - this will hold the deepest stack of tokens the parser was able to parse on the current line.
+#                           If there is an error, the parser will display this stack to let the user know what it was
+#                           able to parse on the current line, and where it errored out.
+# error_expected_buffer - This buffers shows the user what it was expecting to parse.
+# error_bad_buffer      - This buffer shows to the user what the parser read instead of what it was expecting.
+# expected_stack        - This is the actual expected stack, which will keep track of what the parser has parsed so far
+#                           and what it expects next. The 'deepest' expected stack for a line will be saved to
+#                           'error_parsed_buffer', and will be displayed to the user in case of a parse error.
 class AsmParser:
 
     def __init__(self, spec: AsmGrammarSpec, sigma16_labels=False):
@@ -75,6 +126,7 @@ class AsmParser:
     def get_ast(self):
         return self.ast
 
+    # Entrypoint for this module, responsible for kicking off the parsing of the inputted assembly code.
     def parse_asm_listing(self, input_file_path: str):
 
         with open(input_file_path, "r") as f:
@@ -86,6 +138,8 @@ class AsmParser:
 
         return
 
+    # This is the first pass of the parser. It goes over each line of assembly code, and recognizes and parses any
+    # labels that might be on that line.
     def parse_labels(self):
 
         self.line_num = 0
@@ -103,6 +157,7 @@ class AsmParser:
 
         return
 
+    # This is the second pass of the parser. It goes across each line of assembly code and parses it.
     def parse_asm(self):
 
         self.line_num = 0
@@ -120,6 +175,11 @@ class AsmParser:
 
         return
 
+    # Helper method to read a character from the current position in the line, and place it in the token buffer.
+    # Returns True is read was successful, False if an error occured (for example, invalid char or eol).
+    # to_lower - cast the character to lowercase automatically
+    # valid_chars - if character read is not in valid_chars, return False to indicate we have read an invalid character.
+    #               also do not increase position.
     def read_line_char(self, to_lower=True, valid_chars=None):
         next_char = ParseUtils.read_next_char(self.line, self.line_pos)
         if next_char is None:
@@ -133,6 +193,7 @@ class AsmParser:
         self.line_pos += 1
         return True
 
+    # Helper method to let us skip over a string of whitespace characters at the current position in a line.
     def skip_line_whitespace(self):
         self.line_pos = ParseUtils.skip_whitespace(self.line, self.line_pos)
         return
@@ -145,6 +206,7 @@ class AsmParser:
         self.ast.append(node)
         return
 
+    # Method responsible for parsing the current line of assembly code.
     def parse_current_line(self):
 
         self.reset_error_buffer()
@@ -168,6 +230,8 @@ class AsmParser:
 
         return
 
+    # Parses an instruction at the current position of the current line of assembly code. Returns an ASTNode containing
+    # the parsed instruction, or displays an error describing why it wasn't able to parse the instruction.
     def parse_instruction(self) -> ASTNode:
 
         instruction_defn = self.get_insn_defn("INSTRUCTION")  # type: AsmInstructionDefinition
@@ -182,9 +246,12 @@ class AsmParser:
 
         return ASTNode(TokenTypes.PLACEHOLDER, "INSTRUCTION", children, bitfield_modifiers)
 
+    # Get an instruction definition by name from the spec.
     def get_insn_defn(self, insn_defn_name: str):
         return self.spec.spec[insn_defn_name]
 
+    # Match an instruction definition to the characters at the current position. If successful, return any child nodes
+    # produced by the match, along with the bitfield modifiers of the current token pattern that was matched.
     def match_defn(self, defn: AsmInstructionDefinition, top_level=False):
 
         possible_patterns = defn.spec_patterns
@@ -217,6 +284,8 @@ class AsmParser:
 
         return False, [], []
 
+    # Try to match a token pattern from an instruction definition against the characters at the current position. If
+    # successful, return any child AST nodes produced by the match.
     def try_match_token_pattern(self, token_pattern):
 
         pattern_match = False
@@ -235,8 +304,10 @@ class AsmParser:
             token_type = current_token[0]
             token_value = current_token[1]
 
+            # Push the token we are expecting to match on the expected stack
             self.push_expected(token_type, token_value)
 
+            # Different types of match functions will be used depending on the type of token being matched.
             if token_type == TokenTypes.WHITESPACE:
                 token_match = self.try_match_whitespace_token(token_value)
             elif token_type == TokenTypes.INT_TOKEN:
@@ -272,6 +343,7 @@ class AsmParser:
 
         return pattern_match, child_nodes
 
+    # Try to match a whitespace token. Means the parser expects a string of whitespace characters at the current position
     def try_match_whitespace_token(self, token_value):
         token_match = False
 
@@ -284,6 +356,8 @@ class AsmParser:
 
         return token_match
 
+    # Try to match an int token. Means the parser expects a string of characters from a character whitelist (the whitelist
+    # comes from the plugin system) to be present at the current position.
     def try_match_int_token(self, token_value):
         token_match = False
         ast_node = ASTNode()
@@ -300,6 +374,7 @@ class AsmParser:
 
         return token_match, ast_node
 
+    # Try to match a label. Means the parser expects for there to be an alphanumeric identifier at the current position.
     def try_match_label_token(self, token_value):
         token_match = False
         ast_node = ASTNode()
@@ -320,6 +395,7 @@ class AsmParser:
 
         return token_match, ast_node
 
+    # Try to match a raw token. Means the parser expects EXACTLY token_value to be at the current position.
     def try_match_raw_token(self, token_value):
         token_match = False
         ast_node = ASTNode()
@@ -340,10 +416,17 @@ class AsmParser:
 
         return token_match, ast_node
 
+    # Matches a placeholder token. This is done by looking up the placeholder token, and then trying to recursively
+    # match it. Returns any children produced by such a match.
     def try_match_placeholder_token(self, token_value):
         sub_defn = self.get_insn_defn(token_value)
         return self.match_defn(sub_defn)
 
+    # Responsible for matching a token against the characters in the token buffer.
+    # NO_MATCH - means the token buffer does not equal the expected token value
+    # PARTIAL_MATCH - characters in token buffer partially match expected token value. Signals to the parser to keep
+    #                   reading characters into the token buffer in hopes of producing a match.
+    # EXACT_MATCH - characters in token buffer exactly match expected token value.
     def match_token(self, token_val):
 
         if len(token_val) == 0:
@@ -356,6 +439,7 @@ class AsmParser:
         else:
             return TokenMatchType.NO_MATCH
 
+    # Checks if the rest of the current line is empty, and contains no more code.
     def is_rest_empty(self):
         while self.read_line_char() is not False:
             c = self.token_buffer[-1:]
@@ -370,6 +454,11 @@ class AsmParser:
 
         return True
 
+    # Once an instruction definition is matched and parsed, it might have placeholder bitfield modifiers for ints.
+    # The actual values of these int placeholders will be held in INT_TOKENS, which are children of the topmost matched
+    # node. So for each INT_PLACEHOLDER bitfield modifier, iterate across all child nodes and find the INT_TOKEN containing
+    # its placeholder value, emit the correct bits, and then set the INT_PLACEHOLDER to be a regular bitfield modifier which
+    # is simply setting the bits emitted by the plugin.
     def process_int_placeholders(self, bitfield_modifiers: List[BitfieldModifier], children: List[ASTNode]) -> List[BitfieldModifier]:
         processed_bitfields = []
         for b in bitfield_modifiers:
@@ -409,6 +498,7 @@ class AsmParser:
                 raise ValueError
         return processed_bitfields
 
+    # Check if a bitstring is 1's and 0's.
     def is_valid_bitstring(self, bitstring):
         for c in bitstring:
             if c == '0' or c == '1':
@@ -425,6 +515,7 @@ class AsmParser:
         self.expected_stack = []
         return
 
+    # Push the next expected token onto the expected stack.
     def push_expected(self, token_type, token_value):
         if token_type == TokenTypes.RAW_TOKEN:
             self.expected_stack.append("'" + token_value + "'")
@@ -436,6 +527,8 @@ class AsmParser:
             self.expected_stack.append('%' + token_value + '%')
         return
 
+    # In case a match doesn't happen, pop the expected token off the expected stack. If this is the 'deepest' expected
+    # stack so far, then save it so that later it can be used to display an error message if need be.
     def pop_expected(self):
 
         if len(self.expected_stack) > self.max_parsed_depth:
@@ -444,6 +537,8 @@ class AsmParser:
         del self.expected_stack[-1]
         return
 
+    # Build the error message from the expected stack. This shows the user what tokens were parsed so far, what was
+    # expected by the parser, and what the parser read instead of what was expected. Also shows line number.
     def build_error_message(self):
         self.error_expected_buffer = self.expected_stack[-1]
         self.error_bad_buffer = self.token_buffer + self.line[self.line_pos:]
@@ -455,6 +550,7 @@ class AsmParser:
 
         return
 
+    # Shows an error message indicating the rest of the line wasn't empty when it should have been.
     def error_expected_empty_endline(self):
         if len(self.expected_stack) > self.max_parsed_depth:
             self.error_expected_buffer = "<< rest of line should be empty >>"
@@ -467,6 +563,8 @@ class AsmParser:
 
         return
 
+    # Parses the labels on a line. Handles 'regular' labels of type 'label:' or Sigma16 labels which are simply the
+    # first word on a line of text.
     def parse_line_labels(self):
 
         # TODO: Maybe allow for labels of a different format from "label_name:"
