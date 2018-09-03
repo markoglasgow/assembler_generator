@@ -90,7 +90,8 @@ class ARMTypes(IPlugin):
 
     def emit_int_12_bits_offset(self, int_string):
         parsed_int = self.parse_int(int_string)
-        parsed_int = parsed_int * -1
+        if parsed_int < 0:
+            parsed_int = parsed_int * -1
         if parsed_int < 2048:
             b = BitArray(int=parsed_int, length=12)
         else:

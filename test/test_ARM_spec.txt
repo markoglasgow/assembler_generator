@@ -129,7 +129,7 @@ LOAD_STORE =
 
 LOAD_STORE_OPS =
 | str 																:: post_index=1 :: uswl=0000
-| ldr 																:: post_index=1 :: uswl=0001
+| ldr 																:: post_index=1 :: uswl=1001
 ;
 
 DATA_PROCESSING = 
