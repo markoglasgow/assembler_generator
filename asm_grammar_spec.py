@@ -3,7 +3,12 @@ from parse_utils import ParseUtils
 from enum import Enum
 from typing import Dict, List, Optional
 
+# This module is responsible for parsing the custom ADL spec file, which describes the assembler architecture. Once the
+# parsing is done, all information will be held in an AsmGrammarSpec object, which will be passed to the assembly
+# parser for use while parsing the assembly source code
 
+
+# This object holds the name and size of each possible bitfield in an instruction of the specified architecture
 class BitfieldDefinition:
 
     def __init__(self, name, size):
@@ -12,6 +17,12 @@ class BitfieldDefinition:
         return
 
 
+# These are the different types of tokens possible for use in the parser.
+# WHITESPACE - 1 or more whitespace characters
+# RAW_TOKEN - A token which is simply a string which must be matched
+# PLACEHOLDER - A placeholder token which is expanded into another instruction definition
+# INT_TOKEN - Int which should be parsed and emitted by a plugin
+# LABEL_TOKEN - Label which should be parsed and emitted by a plugin
 class TokenTypes(Enum):
     WHITESPACE = 1
     RAW_TOKEN = 2
@@ -20,12 +31,17 @@ class TokenTypes(Enum):
     LABEL_TOKEN = 5
 
 
+# This enum describes the different possible types of Bitfield Modifiers.
+# MODIFIER - Regular modifier, sets some bitfield (specified by name) to some value
+# INT_PLACEHOLDER - Set a bitfield to a bitstream emitted by a plugin, which generates bitstream from parsed int
+# LABEL_PLACEHOLDER - Set a bitfield to a bitstream emitted by a plugin, which generates bitstream for label
 class ModifierTypes(Enum):
     MODIFIER = 1
     INT_PLACEHOLDER = 2
     LABEL_PLACEHOLDER = 3
 
 
+# This object contains the type, name (of bitfield to modify), and value (to set bitfield to) of a bitfield modifier.
 class BitfieldModifier:
 
     def __init__(self, modifier_type, bitfield_name, modifier_value):
@@ -34,6 +50,8 @@ class BitfieldModifier:
         self.modifier_value = modifier_value
 
 
+# Object which contains a token pattern and its bitfield modifiers of an instruction definition parsed from the
+# spec file
 class DefinitionPattern:
 
     def __init__(self, token_patterns, bitfield_modifiers):
@@ -41,6 +59,11 @@ class DefinitionPattern:
         self.bitfield_modifiers = bitfield_modifiers  # type: List[BitfieldModifier]
 
 
+# Object contains information for a single instruction definition parsed from the spec file.
+# name - name of instruction definition
+# line - which line instruction definition appears on in the spec file.
+# spec_patterns - list of token patterns (and their corresponding bitfield modifiers) in the instruction definition
+# only_raw_values - flag used only during debugging
 class AsmInstructionDefinition:
 
     def __init__(self, name, line_num):
@@ -61,6 +84,10 @@ class AsmInstructionDefinition:
         return
 
 
+# This object holds all the information from the parsed spec file.
+# spec - dictionary which allows the program to look up any instruction definition by name
+# bitfields - list of all possible bitfields, in a given order
+# bitfield_indexes_map - lets program look up index of bitfield in 'bitfields' list by its name
 class AsmGrammarSpec:
 
     def __init__(self):
@@ -78,6 +105,8 @@ class AsmGrammarSpec:
         self.bitfield_indexes_map[bitfield.name] = len(self.bitfields) - 1
         return
 
+    # Entrypoint for this module, responsible for reading spec file and parsing it, and then validating it for common
+    # errors
     def read_spec(self, spec_file_path):
         with open(spec_file_path, "r") as f:
             input_file = f.readlines()
@@ -87,6 +116,7 @@ class AsmGrammarSpec:
 
         return
 
+    # This function receives all the lines of the spec file and parses them one-by-one
     def parse_spec(self, spec_file_lines):
 
         line_num = 0
@@ -129,6 +159,9 @@ class AsmGrammarSpec:
 
         return
 
+    # This function is responsible for parsing the bitfield definitions, which specify the names and sizes of all
+    # possible bitfields in an instruction in this architecture. The function keeps parsing until it hits the end
+    # of the file, or the .ASM_INSTRUCTIONS directive. The function will start parsing from the .BIT_FIELDS directive.
     def parse_bitfield_definitions(self, start_line_num, spec_file_lines):
 
         line_num = start_line_num
@@ -169,6 +202,7 @@ class AsmGrammarSpec:
         print("ERROR: .ASM_INSTRUCTIONS is not present in spec file after .BIT_FIELDS")
         raise ValueError
 
+    # Parses and returns the name of a bitfield from a bitfield definition.
     def parse_bitfield_name(self, name_line: str, line_num: int):
 
         if not name_line.startswith("name:"):
@@ -187,6 +221,7 @@ class AsmGrammarSpec:
 
         return bitfield_name
 
+    # Parses and returns the size of a bitfield from a bitfield definition
     def parse_bitfield_size(self, size_line: str, line_num: int):
         if not size_line.startswith("size:"):
             print("ERROR: Bitfield definition size on line %s must start with 'size:'" % (line_num+1))
@@ -210,6 +245,8 @@ class AsmGrammarSpec:
 
         return bitfield_size
 
+    # This function starts from the .ASM_INSTRUCTIONS, and is responsible for parsing the instruction definitions of
+    # the spec file all the way to the end of the file.
     def parse_asm_instructions_spec(self, start_line_num, spec_file_lines):
 
         line_num = start_line_num
@@ -239,6 +276,9 @@ class AsmGrammarSpec:
 
         return
 
+    # Responsible for parsing a single instruction definition in the spec file. An instruction definition starts with
+    # a name, followed by a list of token patterns, and ends with a ;.  Each token pattern can also optionally have
+    # associated bitfield modifiers.
     def parse_single_asm_instr_defn(self, start_line_num, spec_file_lines):
 
         line_num = start_line_num
@@ -266,6 +306,7 @@ class AsmGrammarSpec:
 
         return asm_defn, line_num
 
+    # Responsible for parsing and returning the name of an instruction definition
     def read_asm_defn_name(self, line, line_num):
 
         name, pos = ParseUtils.read_identifier(line)
@@ -283,6 +324,11 @@ class AsmGrammarSpec:
 
         return name
 
+    # Function is responsible for reading a token pattern and its associated bitfield modifiers. Can also return and
+    # stop parsing if it detects a ; character (which denotes the end of the instruction definition).
+    # Each token pattern's line must begin with |. It is followed by a list of raw tokens/whitespace tokens/placeholders
+    # A placeholder token is surrounded by %% characters
+    # Optionally, a list of bitfield modifiers (denoted with :: characters) can come after a token pattern.
     def read_asm_defn_pattern(self, line, line_num) -> Optional[DefinitionPattern]:
 
         pattern_tokens = []
@@ -358,6 +404,7 @@ class AsmGrammarSpec:
 
         return DefinitionPattern(pattern_tokens, bitfield_modifiers)
 
+    # Parse and return the list of bitfield modifiers associated with the current token pattern.
     def read_bitfield_modifiers(self, raw_bitfield_modifiers: str, line_num: int) -> List[BitfieldModifier]:
 
         modifiers_arr = []
@@ -368,6 +415,7 @@ class AsmGrammarSpec:
 
         return modifiers_arr
 
+    # Parses a single bitfield modifier string and returns a BitfieldModifier object holding its information.
     def parse_modifier_string(self, modifier_string, line_num) -> BitfieldModifier:
 
         if "=" in modifier_string:
@@ -409,6 +457,7 @@ class AsmGrammarSpec:
             print("ERROR: Unable to parse bitfield modifier '%s' on line %s" % (modifier_string, line_num + 1))
             raise ValueError
 
+    # Validates the value of a bitfield modifier (can only be 1's and 0's). Returns the validated value.
     def read_modifier_value(self, value_string):
         # TODO: Maybe store these values as BitArray instead of a string of 1's and 0's?
         for c in value_string:
@@ -419,6 +468,7 @@ class AsmGrammarSpec:
         return value_string
 
     # TODO: Detect recursion in spec.
+    # Validates the parsed spec for common errors, so they don't crash the assembler later.
     def validate_spec(self):
 
         if "INSTRUCTION" not in self.spec:
