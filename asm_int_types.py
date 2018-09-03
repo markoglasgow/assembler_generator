@@ -1,6 +1,10 @@
 from yapsy.PluginManager import PluginManager
 from typing import Dict
 
+# This module is responsible for loading and validating all plugins, registering their types, and then presenting a
+# simple interface for the rest of the program to be able to use the plugin system to validate ints/labels and emit
+# bitstreams for them.
+
 
 class AsmIntTypes:
 
@@ -14,6 +18,8 @@ class AsmIntTypes:
     def __init__(self):
         return
 
+    # This method is run at the beginning of the generic assembler. It loads all plugins, registers their types, and
+    # makes sure the plugin implements the correct interface for each type.
     @staticmethod
     def load_plugins():
         manager = PluginManager()
@@ -63,12 +69,14 @@ class AsmIntTypes:
 
         return
 
+    # This function lets the rest of the program check if a type is defined in the plugin system.
     @staticmethod
     def is_defined_type(int_type):
         if int_type not in AsmIntTypes.defined_types:
             return False
         return True
 
+    # This function lets the rest of the program get a character whitelist for parsing integers of a certain type.
     @staticmethod
     def get_valid_chars(int_type):
         if not AsmIntTypes.is_defined_type(int_type):
@@ -76,16 +84,23 @@ class AsmIntTypes:
             raise ValueError
         return AsmIntTypes.valid_chars[int_type]
 
+    # This function lets the rest of the program query the plugin system to see if a certain type of interger it has
+    # parsed is valid (for example: is in valid format, isn't overflowing, etc...)
     @staticmethod
     def validate_integer(int_type, int_string):
         verify_method = AsmIntTypes.verify_methods[int_type]
         return verify_method(int_string)
 
+    # This function lets the rest of the program use the plugin system to emit the bitstream for a certain type of
+    # integer
     @staticmethod
     def emit_bits(int_type, int_string):
         emit_method = AsmIntTypes.emit_methods[int_type]
         return emit_method(int_string)
 
+    # This function lets the rest of the program use the plugin system to calculate and emit the bitstream for a label.
+    # As input, it takes the type of the label, the address of the instruction using the label, and the actual memory
+    # location associated with the label.
     @staticmethod
     def calc_label_bits(label_type, source_address, label_address):
         calc_method = AsmIntTypes.calc_methods[label_type]
