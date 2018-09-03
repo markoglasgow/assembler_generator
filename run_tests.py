@@ -5,10 +5,12 @@ import sys
 # went wrong. It runs tests to assemble different code snippets for the x86, ARM, and Sigma16 architectures, and checks
 # the assembled code against an expected disassembly listing where possible.
 
-# To run tests which use the disassembler, run with command line argument --with-disasm. Otherwise by default tests
+# To run tests without the disassembler, run with command line argument --without-disasm. Otherwise by default tests
 # will run without checking disassembler output.
 # Note that disassembly is done with Capstone. Make sure that Capstone is uncommented in requirements.txt, and that
 # ENABLE_DISASSEMBLER is set to True in main.py to enable Capstone.
+# On Windows, Capstone will by default not correctly install with pip. Go to requirements.txt, comment out capstone,
+# and uncomment capstone-windows dependency. Then try running 'pip install -r requirements.txt' again.
 
 
 def with_disasm():
@@ -238,11 +240,11 @@ def without_disasm():
 
 def main():
 
-    if len(sys.argv) >= 2 and sys.argv[1] == '--with-disasm':
-        with_disasm()
+    if len(sys.argv) >= 2 and sys.argv[1] == '--without-disasm':
+        without_disasm()
         return
     else:
-        without_disasm()
+        with_disasm()
         return
 
 
