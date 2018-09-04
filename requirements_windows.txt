@@ -1,4 +1,4 @@
 bitstring==3.1.5
-capstone==3.0.5
+capstone-windows==3.0.4
 tabulate==0.8.2
 Yapsy==1.11.223

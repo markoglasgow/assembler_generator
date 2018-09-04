@@ -9,8 +9,6 @@ import sys
 # will run without checking disassembler output.
 # Note that disassembly is done with Capstone. Make sure that Capstone is uncommented in requirements.txt, and that
 # ENABLE_DISASSEMBLER is set to True in main.py to enable Capstone.
-# On Windows, Capstone will by default not correctly install with pip. Go to requirements.txt, comment out capstone,
-# and uncomment capstone-windows dependency. Then try running 'pip install -r requirements.txt' again.
 
 
 def with_disasm():

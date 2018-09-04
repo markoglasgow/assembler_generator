@@ -11,8 +11,6 @@ from optparse import OptionParser
 
 # Set this flag to True to enable Capstone integration and disassembly support. The Capstone disassembler is used to
 # check the assembled machine code, to make sure that it matches the expected output.
-# On Windows, Capstone will by default not correctly install with pip. Go to requirements.txt, comment out capstone,
-# and uncomment capstone-windows dependency. Then try running 'pip install -r requirements.txt' again.
 ENABLE_DISASSEMBLER = True
 
 if ENABLE_DISASSEMBLER:
