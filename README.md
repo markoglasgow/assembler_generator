@@ -318,4 +318,94 @@ For more information on the different features of the generic assembler, please 
 
 ## Documentation
 
+### Custom ADL
+
+The custom ADL (architecture description language) is used to specify the assembly language syntax and machine code generation rules that will be used by the generic assembler to assemble machine code for an architecture. The custom ADL is divided into two sections, and is passed to the generic assembler as a text file.
+
+The first section of the custom ADL starts with the `.BIT_FIELDS` directive. All statements below the `.BIT_FIELDS` directive will describe a potential bitfield in the encoded instruction. Each bitfield is defined by two text fields spanning two lines. The first is `name`, the other is `size`. For example:
+
+```
+name: test
+size: 3
+```
+
+... will define a bitfield named `test` with a size of `3` bits. The bitfield declarations will continue until the `.ASM_INSTRUCTIONS` directive.
+
+### Instruction Definitions
+
+The `.ASM_INSTRUCTIONS` signals the beginning of the second part of the specification file. In this file, the assembly language syntax will be specified, along with which bitfields should be set to properly encode an instruction.
+
+The second part of the specification is composed of a list of instruction definitions. Each instruction definition takes the following form:
+
+```
+DATA_PROCESSING_MNEMONICS =
+| add 					:: opcode=0100
+| sub 					:: opcode=0010
+;
+```
+
+The instruction definition is divided into three parts. The first line of each instruction definition begins with the name of the instruction definition, followed by the '=' character.
+
+Underneath the name of the instruction definition are one or more token patterns. Token patterns describe a series of tokens which must be matched for the instruction definition to be correctly identified.
+
+The instruction definition ends with a `;` character on the last line, which indicates the end of the instruction definition.
+
+### Token Patterns
+
+The most important part of each instruction definition are the token patterns. There are 4 different types of token patterns:
+
+  - raw tokens - strings of characters which must be matched
+  - placeholder tokens - placeholders which will be expanded into other instruction definitions
+  - int tokens - indicating an integer should be present at this point in the token pattern. The verification and bitstream generation of the integer is usually handled by a plugin.
+  - label tokens - indicating that a reference to a label should be present at this point in the token pattern. Again, bitstream generation for labels is handled by the plugin system.
+
+Raw tokens are the simplest, and are simply a string of characters which must be present for a token pattern to be a match. For example, in the following instruction definition:
+
+```
+DATA_PROCESSING_MNEMONICS =
+| add 					:: opcode=0100
+| sub 					:: opcode=0010
+;
+```
+
+`add` and `sub` are raw tokens.
+
+Placeholder tokens are the name of some other instruction definition, surrounded by % characters. The generic assembler will automatically expand placeholder tokens using the token patterns from the other specified instruction definition. For example:
+
+```
+PUSH_INSTRUCTION = 
+| push %32_BIT_REG%								:: short_opcode=0101 0
+;
+
+32_BIT_REG =
+| eax                                           :: reg=000
+| ecx                                           :: reg=001
+;
+```
+
+`%32_BIT_REG%` is a placeholder token for the `32_BIT_REG` instruction definition. This placeholder token is expanded into two raw token patterns which match `eax` and `ecx`. Thus the above instruction definitions will match both the `push eax` and `push ecx` instructions. 
+
+Placeholder tokens are useful for eliminating repetition in specs and reusing certain instructions definitions across multiple different instructions. 
+
+Int tokens look like raw tokens, except they begin with the `int_` prefix. Similary, label tokens look like raw tokens, except they begin with the 'label_' prefix. In both cases, the bitfields for these data types are calculated by the plugin system. For example:
+
+```
+32_BIT_IMMEDIATE = 
+| int_32_bits                                   :: immediate_32=%int_32_bits%
+| label_x86_imm_32_bits                         :: immediate_32=%label_x86_imm_32_bits%
+;
+```
+  
+`32_BIT_IMMEDIATE` has two token patterns, one which matches an `int` called `int_32_bits`, while the other matches a `label` called `label_x86_imm_32_bits`. The bitfields for both of these will be emitted by a plugin.
+
+### Bitfield Modifiers
+
+In all of the above examples, token patterns had a list on the right of the token pattern, delimited with `::` characters. These are lists of 'bitfield modifiers'. A bitfield modifier has the following structure:
+
+`name=value`
+
+Where `name` is a bitfield name, and `value` is a string of 1's and 0's which specify what binary value the bitfield will be set to. The `name` of the bitfield must match some bitfield name declared in the `.BIT_FIELDS` section of the custom ADL. 
+
+The bitfield modifiers indicate to the generic assembler which bitfields should be set in an instruction if a token pattern is matched. 
+
 --------
