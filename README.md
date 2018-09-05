@@ -12,7 +12,7 @@ To get the generic assembler up and running on your machine, check out the [Inst
 
 To quickly run some examples see the [Quick Start](#quick-start) section.
 
-To view a short walkthrough on specifying your own architecture and then assembling machine code for it, check out the [Tutorial](#tutorial) section.
+To view a detailed walkthrough on specifying your own architecture and then assembling machine code for it, check out the [Tutorial](#tutorial) section.
 
 To view the documentation, check out the [Documentation](#documentation) section.
 
@@ -257,8 +257,62 @@ Here is an explanation of the command line flags:
   - `--write-object=out.exe` Write an executable binary file called 'out.exe'
   - `--template-path=bin_templates/osx/x86/HelloWorld32` Inject the assembled machine code into the given binary template file at `bin_templates/osx/x86/HelloWorld32`. This expects for a text file to be present at `bin_templates/osx/x86/HelloWorld32.info` containing 2 lines of text. The first line should specify the offset in the binary file where the assembled machine code should be injected, while the second line should specify the maximum possible size of the injected machine code.
 
+Upon executing this command, you will see three different types of output in the terminal, and a file called `out.exe` will be created in the current directory. You can execute `out.exe` and it should return without doing anything (indicating that it ran and exited cleanly, which is what the test assembly program is supposed to do).
 
+The first type of output visible in the terminal will be a debug representation of the AST. The AST node of each parsed instruction will be present, indicating which token patterns were matched when parsing the instruction, and which bitfield modifiers are set for each token pattern. For example:
 
+```
+push ecx
+INSTRUCTION                                                                                                             
+    PUSH_INSTRUCTION    :: short_opcode=01010 
+        'push'                                                                                                          
+        32_BIT_REG      :: reg=001 
+            'ecx'    
+```
+
+... indicates that `push ecx` was parsed as a `PUSH_INSTRUCTON` with a `push` raw token, and a `32_BIT_REG` which was resolved to be `ecx`. The following bitfield modifiers are set due to the token patterns which were matched:
+
+  - `short_opcode`=`01010 `
+  - `reg`=`001 `
+
+The second type of output visible in the terminal is the debug info of the bitstream generator. This shows for each instruction what bitfields are set to what value, and what the output bytes are. For example:
+
+```
+push ecx
+  short_opcode    reg
+--------------  -----
+         01010    001
+Bytes (padded): 
+51 
+```
+
+... indicates that the `push ecx` instruction has two bitfields set:
+  - `short_opcode`=`01010 `
+  - `reg`=`001 `
+
+These bitfields when put together into a bitstream generate the hexadecimal `0x51h` byte, which is the correct machine code for the `push ecx` instruction.
+
+The final type of output present in the terminal is the Capstone disassembly of the assembled machine code:
+
+```
+0x1000:	push	1
+0x1005:	push	ecx
+0x1006:	pop	ecx
+0x1007:	pop	eax
+0x1008:	jmp	0x100e
+0x100d:	nop	
+0x100e:	ret
+```
+
+This is a useful sanity check which lets you make sure that the outputted machine code matches the input assembly source code.
+
+This concludes the tutorial. In this tutorial we saw:
+  - how to define an architecture using the custom ADL
+  - how to write a small assembly program using the architecture
+  - how to pass the architecture spec and the assembly code to the generic assembler for assembling
+  - how to interpret and use the output of the generic assembler.
+
+For more information on the different features of the generic assembler, please see the [Documentation](#documentation) section below.
 
 --------
 
