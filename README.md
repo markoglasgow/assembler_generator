@@ -8,17 +8,31 @@ The generic assembler takes two inputs:
   
 Its output is the binary machine code of the assembled code.
 
-To get the generic assembler up and running on your machine, check out the Installation section.
+To get the generic assembler up and running on your machine, check out the [Installation](#installation) section.
 
-To quickly run some examples see the Quick Start section.
+To quickly run some examples see the [Quick Start](#quick-start) section.
 
-To view a short walkthrough on specifying your own architecture and then assembling machine code for it, check out the Tutorial section.
+To view a short walkthrough on specifying your own architecture and then assembling machine code for it, check out the [Tutorial](#tutorial) section.
 
-
-
+To view the documentation, check out the [Documentation](#documentation) section.
 
 --------
 
+## Installation
+
+--------
+
+## Quick Start
+
+--------
+
+## Tutorial
+
+--------
+
+## Documentation
+
+--------
 
 # New Features!
 
