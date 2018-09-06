@@ -406,6 +406,97 @@ In all of the above examples, token patterns had a list on the right of the toke
 
 Where `name` is a bitfield name, and `value` is a string of 1's and 0's which specify what binary value the bitfield will be set to. The `name` of the bitfield must match some bitfield name declared in the `.BIT_FIELDS` section of the custom ADL. 
 
-The bitfield modifiers indicate to the generic assembler which bitfields should be set in an instruction if a token pattern is matched. 
+The bitfield modifiers indicate to the generic assembler which bitfields should be set in an instruction if a token pattern is matched. If a bitfield is not referenced by a bitfield modifier, it will be ignored during instruction bitstream generation.
+
+While most bitfield modifiers have values which are simply strings of 1's and 0's, in rare cases, the bitfield modifier values can be calculated by the plugin system. For example: 
+
+```
+32_BIT_IMMEDIATE = 
+| int_32_bits                                   :: immediate_32=%int_32_bits%
+| label_x86_imm_32_bits                         :: immediate_32=%label_x86_imm_32_bits%
+;
+```
+
+In this snippet, the `immediate_32` bitfield value is either emitted as an `int_32_bits` calculated by a plugin, or a `label_x86_imm_32_bits` calculated by a plugin. How the plugin system calculates the values of bitfields is described in the following section.
+
+### The Plugin System
+
+The plugin system allows users to write Python plugins to help parse and emit bitstreams for ints and labels. To create a plugin, the user must create a `*.py` file in the `plugins` folder, and a `*.yapsy-plugin` file with the same name.
+
+The `*.yapsy-plugin` file is just metadata, and should use the following template:
+
+```
+[Core]
+Name = Builtin Types
+Module = builtin_types
+
+[Documentation]
+Author = Marko Caklovic
+Version = 1.0
+Website = https://github.com/markoglasgow
+Description = Builtin types parser and emitter for the Generic Assembler Generator
+```
+
+The `*.py` file needs to implement a class which inherits from the Yapsy  `IPlugin` interface. The implemented class must have the following properties:
+
+It must implement a function called `get_registered_types` which takes no parameters, and returns a `Dict[str:bool]`, where each string key is the name of a data type it supports.
+
+The name of each data type must begin with either `int_` or `label_`. `int_` indicates the data type is an `int` and fulfills the `int` interface, while `label_` indicates the data type is a `label` and fulfills the `label` interface.
+
+To fulfill the `int` interface, the plugin must define the following functions:
+
+`chars_<name of data type>` - takes no parameters, returns a list of allowed characters for the string representation of this int type.
+
+`verify_<name of data type>` - takes a string parameter, which is the string representation of int data type parsed from the assembly source code. Returns a `bool` indicating whether or not the string is a valid representation of the int data type.
+
+`emit_<name of data type>` - takes a string parameter, which is the string representation of int data type parsed from the assembly source code. Returns a bit string which is the bitwise representation of the integer. This bit string is ultimately embedded in the bitstream of the instruction.
+
+To fulfill the `label` interface, the plugin must only define the following function:
+
+`calc_<name of data type>` - takes 2 int parameters. The first parameter is the memory address of the instruction which is referencing the label, while the second parameter is the memory address of the label itself. The return value is a bit string representing the memory address/offset which should be embedded in the instruction bitstream.
+
+Example implementations for all of the above methods are available in `plugins/builtin_types.py`
+
+### Command Line Parameters
+
+The following is a list of all command line parameters, followed by a description for each one:
+
+  `-s FILE, --spec-file=FILE`        Spec file of architecture being assembled. REQUIRED
+  `-a FILE, --asm-file=FILE`        Assembly source code file to be assembled. REQUIRED
+  
+  `--sigma16-labels`     Parse labels as Sigma16 labels.
+  
+  `--print-ast`           Print AST of parsed assembly code.
+  
+  `--print-bitstream`     Print debug info about generated bitstream.
+  
+  `--imagebase=IMAGEBASE`        Specify memory address that generated code will be loaded at.
+  
+  `--print-disasm`        Print disassembly of assembled machine code. Requires that ENABLE_DISASSEMBLER be set to 'True' in main.py, and for Capstone dependency to be installed. --disasm-arch option must also be set if this option is set.
+  
+  `--disasm-arch=DISASM_ARCH`        Specifies architecture of the disassembler. Possible options are 'x86' and 'arm'.
+  
+  `--check-disasm=FILE`        Checks disassembly of generated machine code against a text file. Throws error if the listings don't match. Used for testing. --disasm-arch option must also be set if this option is set.
+  
+  `--write-bin=FILE`        Specifies file where bytes of assembled machine code should be saved.
+  
+  `--write-sigma16=FILE`        Specifies file where assembled sigma16 bytecode should be saved.
+  
+  `--write-object=FILE`        Specifies output path of object file. Object file is generated by inserting assembled machine code into a template object file. Template object file that machine code will be inserted into must be specified via --write-template.
+  
+  `--template-path=FILE`        Path to template object file into which machine code will be inserted. Must be specified if --write-object is specified. By default, object templates are located in the bin_templates folder
+
+### Object Template Files
+
+The generic assembler ships with OSX, Linux, and Windows template object files. These are object files with code caves in them, which can be overwritten by machine code generated by the generic assembler. If specified via command line parameters, the generic assembler can automatically inject machine code into these template object files, allowing the user to execute the generated object file to test their assembled machine code.
+
+The object file templates are located in the `bin_templates` folder of the generic assempler. Each object template has a `*.info` file in the same folder, which is a text file with two lines, for example:
+
+```
+0x00000310
+0x000005c2
+```
+
+... where the first line is a decimal or hexadecimal file offset where the generated machine code should be injected, and the second line is the maximum size of the generated machine code that can be injected.
 
 --------
